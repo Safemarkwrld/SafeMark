@@ -8,7 +8,6 @@ const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
-const PORT = 3000;
 
 // -------------------- Middleware --------------------
 app.use(express.urlencoded({ extended: true }));
@@ -524,8 +523,8 @@ app.get("/api/me", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-//=============PROFILE CHECKINSS===============
 
+// -------------------- Profile API --------------------
 // -------------------- Profile API --------------------
 app.get("/api/profile", requireLogin, async (req, res) => {
   try {
@@ -535,7 +534,16 @@ app.get("/api/profile", requireLogin, async (req, res) => {
     );
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.json(user);
+    // ✅ fetch verification address
+    const verification = await Verification.findOne(
+      { userId: req.session.userId },
+      "address"
+    );
+
+    res.json({
+      ...user.toObject(),
+      address: verification ? verification.address : null,
+    });
   } catch (err) {
     console.error("Profile fetch error:", err);
     res.status(500).json({ error: "Failed to fetch profile" });
@@ -609,9 +617,15 @@ app.get("/api/users/:userId", async (req, res) => {
     );
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const verification = await Verification.findOne({ userId: req.params.userId }, "address");
+    const verification = await Verification.findOne(
+      { userId: req.params.userId },
+      "address"
+    );
 
-    res.json({ ...user.toObject(), address: verification ? verification.address : null });
+    res.json({
+      ...user.toObject(),
+      address: verification ? verification.address : null,
+    });
   } catch (err) {
     console.error("Public profile fetch error:", err);
     res.status(500).json({ error: "Failed to fetch profile" });

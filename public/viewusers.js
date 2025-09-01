@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-
 function setupMenu() {
   const openMenuBtn = document.getElementById("openmenu");
   const closeMenuBtn = document.getElementById("closemenu");
