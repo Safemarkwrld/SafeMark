@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SafeMark - Home</title>
+        <link rel="stylesheet" href="indexstyles.css">
+    </head>
+    <body>
+        <div class="outContainer">
+            <div class="topBar">
+                <h2>SafeMark</h2>
+                <div class="topright">
+                    <a href="login.html" id="signinBtn">Sign-In</a>
+                    <button id="openmenu"><img src="menu-alt-64.webp" alt="menu" id="menuIcon"></button>
+                </div>
+                
+            </div>
+            <div id="more">
+                <div id="menu">
+                    <button class="closemenu" id="closemenu"><img src="closeicon2234.webp" alt="close" id="closeicon"></button>
+                    <div class="profilecont">
+                        <img src="icons_user2-64.webp" id="menuIcons">
+                        <a href="signup.html">Create Profile</a>
+                    </div>
+                    <div class="mailcont">
+                        <img src="mail-64.webp" id="menuIcons">
+                        <a href="login.html">safemark@gmail.com</a>
+                    </div>
+                    <div class="contactcont">
+                        <img src="ecommerce_phone-64.webp" id="menuIcons">
+                        <a href="login.html">Contact us</a>
+                    </div>
+                    <div class="aboutcont">
+                        <img src="3480883.png" id="menuIcons">
+                        <a href="login.html">About us</a>
+                    </div>
+                </div>
+            </div>
+            <div class="service">
+                <div class="services-box">
+                    <h2>MarketPlace Services</h2>
+                    <br>
+                    <p>Experience peace of mind with every transaction. 
+                         Online MarketPlace Security is designed to protect buyers and sellers through verified listings, user authentication,
+                         and real-time support — so you can trade confidently in a safe and trusted environment.
+                    </p>
+                    <div class="place-image">
+                        <img src="5722007_1652178226_consumer.jpg">
+                        <a href="login.html" id="signupBtn">Sign-Up</a>
+                    </div>
+                </div>
+                <div class="services-box">
+                    <h2>SafeMark - Goal</h2>
+                    <br>
+                    <p><b>SafeMark</b> aims to create a safer and more trustworthy environment for online marketplaces by providing astreamlined,
+                    user-friendly system for verifying identities, monitoring activity, and protecting transactions.
+                    Our goal is to build confidence between buyers and sellers through <i>transparency, accountability, and smart security practices.</i>
+                    </p>
+                    <div class="place-image">
+                        <img src="controlofprivacy.jpg">
+                        <a href="login.html" id="ourmissionBtn">Our mission</a>
+                    </div>
+                    
+                </div>
+                <div class="video-section"><video class="videobg" autoplay muted loop playsinline><source src="friendatbeachvideo.mp4" type="video/mp4"></video>
+                    <div class="about">
+                        <h2>About - SafeMark</h2>
+                        <br>
+                        <p><b>SafeMark</b> is a proudly South African platform established by local manufacturers and domestic innovators. 
+                            Its mission is to create a trusted, secure platform where individuals can engage in <b>Consumer-to-Consumer (C2C)</b> trade with confidence.
+                            <i>By prioritizing safety and transparency,</i> it empowers everyday South Africans to buy and sell goods without fear of crime, fraud, 
+                            or illegal transactions — fostering a responsible and crime-free trading environment for all.</p>
+                            <a href="login.html" id="aboutBtn">About</a>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-sticky" id="bottom-sticky">
+                <div class="upperBar">
+                    <h2>SafeMark</h2>
+                    <a href="#"><img src="220236.png" alt="whatsapp" id="socialm"></a>
+                    <a href="#"><img src="5968764.png" alt="facebook" id="socialm"></a>
+                    <a href="#"><img src="1384063.png" alt="instagram" id="socialm"></a>
+                    <a href="#"><img src="1384060.png" alt="youtube" id="socialm"></a>
+                </div>
+                <div class="accordion">
+                   <div class="accordion-item">
+                      <button class="accordion-button">Store support and legal</button>
+                      <div class="accordion-content">
+                          <p>Details about store support and legal info...</p>
+                      </div>
+                    </div>
+                    <div class="accordion-item">
+                         <button class="accordion-button">Our actions</button>
+                         <div class="accordion-content">
+                             <a href="#">Data and privacy</a>
+                             <a href="#">Responsible business practices</a>
+                         </div>
+                    </div>
+
+                    <div class="accordion-item">
+                         <button class="accordion-button">About us</button>
+                         <div class="accordion-content">
+                             <p>Company background and team info...</p>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                         <button class="accordion-button">Site terms and policies</button>
+                        <div class="accordion-content">
+                             <p>Terms and policy documents...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            // Accordion toggle code
+            const buttons = document.querySelectorAll('.accordion-button');
+            buttons.forEach(button => {
+            button.addEventListener('click', () => {
+            const item = button.parentElement;
+            item.classList.toggle('active');
+               });
+            });
+
+    // === Sidebar show/hide code ===
+    const openBtn = document.getElementById('openmenu');
+const closeBtn = document.getElementById('closemenu');
+const menu = document.getElementById('menu');
+const more = document.getElementById('more');
+
+openBtn.addEventListener('click', () => {
+    more.style.display = 'block'; // show the hidden container
+    menu.style.transform = 'translateX(0%)'; // slide in the sidebar
+    document.body.style.overflow = 'hidden'; // optional: prevent background scroll
+});
+
+closeBtn.addEventListener('click', () => {
+    menu.style.transform = 'translateX(100%)'; // slide out the sidebar
+    setTimeout(() => {
+        more.style.display = 'none'; // hide the outer container after animation
+        document.body.style.overflow = '';
+    }, 300); // wait for animation to finish
+});
+</script>
+    </body>
+</html>

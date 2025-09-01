@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head><title>test</title>
+  <style>
+.cart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* spacing between items */
+  padding: 20px;
+}
+
+.cart-item {
+  display: flex;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  align-items: center;
+}
+
+.item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-right: 15px;
+  border-radius: 8px;
+}
+
+.item-details {
+  flex: 1;
+}
+
+.item-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 5px;
+}
+
+.item-price {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.item-quantity {
+  padding: 5px;
+  border-radius: 5px;
+}
+  </style>  
+  </head>
+<body>
+<div class="cart-container">
+  <div class="cart-item">
+    <img src="your-image.jpg" alt="Product Image" class="item-image" />
+    <div class="item-details">
+      <h4 class="item-name">Samsung A22s</h4>
+      <p class="item-price">R2200</p>
+      <select class="item-quantity">
+        <option>1</option>
+        <option>2</option>
+        <!-- etc -->
+      </select>
+    </div>
+  </div>
+
+  <div class="cart-item">
+    <img src="your-image.jpg" alt="Product Image" class="item-image" />
+    <div class="item-details">
+      <h4 class="item-name">Dell Keyboard</h4>
+      <p class="item-price">R320</p>
+      <select class="item-quantity">
+        <option>1</option>
+        <option>2</option>
+      </select>
+    </div>
+  </div>
+</div>
+</body>
+</html>

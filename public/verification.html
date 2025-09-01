@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Verification</title>
+  <link rel="stylesheet" href="verification.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Account Verification</h2>
+
+    <!-- Step 1: Personal Info -->
+    <div class="step active" id="step1">
+      <label for="fullname">Full Name</label>
+      <input type="text" id="fullname" placeholder="First Name">
+
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com">
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="+27 700 123 4567">
+
+      <button id="next1">Next</button>
+    </div>
+        <!-- step 2--ADDRESS VERIFICATIONS-->
+    <div class="step" id="step2">
+      <label for="address">Residential Address</label>
+      <input type="text" id="address" placeholder="123 Main Street, Pretoria">
+      <details>
+        <summary>How to get Dropped pin from Google maps?</summary>
+        <p></p>
+      </details>
+
+      <label for="droppedpin">Dropped Pin (from google Maps)<a href="https://maps.google.com"><img src="google-maps-64.webp" id="googlemapsIcon"></a></label>
+      <div class="droppedpin-box">
+        <input type="text" name="latitude" id="latitudePin" placeholder="-25.7466437" required><label for="latitude">latitude (e.g, -25.7466437)</label>
+      </div>
+      <div class="droppedpin-box">
+        <input type="text" name="longitude" id="longitudePin" placeholder="28.2071118" required><label for="longitude">latitude (e.g, 28.2071118)</label>
+      </div>
+      <button id="next2">Next</button>
+      <button id="prev2">Previous</button>
+    </div>
+    <!-- Step 3: Upload ID -->
+    <div class="step" id="step3">
+      <label for="idFront">Upload ID/License Front</label>
+      <input type="file" id="idFront" accept="image/*,application/pdf">
+
+      <label for="idBack">Upload ID/License Back</label>
+      <input type="file" id="idBack" accept="image/*,application/pdf">
+
+      <button id="next3">Next</button>
+      <button id="prev3">Previous</button>
+    </div>
+
+    <!-- Step 4: Selfie Capture -->
+    <div class="step" id="step4">
+      <label>Take a Selfie</label>
+      <div class="instructions">
+        Look at the camera, turn your head slightly left/right.
+      </div>
+      <video id="video" autoplay playsinline></video>
+      <button onclick="captureSelfie()">Capture Selfie</button>
+      <canvas id="selfieCanvas" style="display:none;"></canvas>
+      <input type="file" id="selfie" name="selfie" accept="image/*" style="display: none;">
+
+      <button id="next4">Next</button>
+      <button id="prev4">Previous</button>
+    </div>
+
+    <!-- Step 5: Submission -->
+    <div class="step" id="step5">
+      <h3>Review & Submit</h3>
+      <p>All your information has been captured. An admin will manually review your ID and selfie.</p>
+      <button onclick="submitVerification()">Submit Verification</button>
+      <button id="prev5">Previous</button>
+    </div>
+  </div>
+  <script src="verification.js">
+    
+  </script>
+</body>
+</html>

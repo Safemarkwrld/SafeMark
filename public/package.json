@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "body": "^5.1.0",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.3",
+    "parser": "^0.1.4"
+  }
+}

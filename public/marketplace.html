@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Marketplace</title> 
+    <link rel="stylesheet" href="marketplace.css"> 
+  </head>
+  <body>
+    <div class="parentcont">
+      <div class="topbar">
+        <a href="landingpage.html"><img src="arrow-back-circle-outline-64.webp" alt="Back"></a>
+        <h2>MarketPlace</h2>
+      </div>
+      <div class="tabs-container">
+        <div class="tab active" onclick="showSection('selling')">Sell items</div>
+        <div class="tab" onclick="showSection('cart')">My Cart</div>
+        <div class="tab" onclick="showSection('search')">Search items</div>
+      </div>
+      <div class="tabsOutput-container">
+
+        <!--This is going to show only if ('selling') is active-->
+        <div id="sell-items" class="tab-panel active">
+          <div class="create-listing">
+            <button id="toggleListingBtn">Create new listing</button>
+            <p><b>Note that for every listing, R119.99 is charged.</b></p>
+          </div>
+          <div class="createList" id="createList" style="display: none;">
+            <div class="createlist-form" id="createlist-form">
+              <h3>New listing</h3>
+              <div class="fullForm">
+                <form method="post" action="/items/add" enctype="multipart/form-data">
+                  <div class="input-form">
+                    <label>What are you selling?</label>
+                    <input type="text" name="name" required>
+                    <br>
+                  </div>
+                  <div class="input-form">
+                    <label>Description</label>
+                    <input type="text" name="description" required>
+                    <br>
+                  </div>
+                  <div class="input-form">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" min="1" required>
+                    <br>
+                  </div>
+                  <div class="input-form">
+                    <label>Price (R)</label>
+                    <input type="number" name="price" required>
+                    <br>
+                  </div>
+                  <div class="fileInput-form">
+                    <label>Add photos (up to 5)</label>
+                    <input type="file" name="images" accept="image/*" multiple max="5" required>
+                    <br>
+                  </div>
+                  <button type="submit" id="publishBtn">Publish</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div id="seller-items" class="seller-items"></div>
+        </div>
+
+
+        <!--This is going to show only if ('cart') is active-->
+
+        <div id="my-cart" class="tab-panel">
+          <div id="added-items">
+            
+          </div>
+          <div id="cart-footer" class="cart-footer hidden">
+            <div class="cart-total">
+              <h3>Total: R<span id="cart-total">0.00</span></h3>
+            </div>
+            <button id="proceed-to-checkout-btn" class="proceed-to-checkout-btn">Proceed to Checkout</button>
+          </div>
+        </div>
+
+
+        <!--This is going to show only if ('search') is active-->
+
+        <div id="search" class="tab-panel">
+
+
+          <!--compulsory to show when search tab is active-->
+            <div class="search-container">
+              <form id="search-form">
+                <input type="text" id="search-input" required><label>Search items by code...</label>
+                <button type="submit" id="search-bycode"><img src="751381.png" class="search-icon"></button>
+              </form>
+            </div>
+            <div id="noItems-found" class="noItems-found">
+                
+            </div>
+            <div id="search-results" class="search-results">
+                
+            </div>
+          </div>
+        </div>   
+      </div>
+    </div>
+    <script src="marketplace.js">
+    </script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SafeMark - Sign-In</title>
+    <link rel="stylesheet" href="login.css">
+  </head>
+  <body>
+    <div class="outerCont">
+      <h1>SafeMark</h1>
+      <h3>Welcome</h3>
+      <h4>Sign in</h4>
+      <div class="detailsCont">
+        <form method="post" action="/login">
+          <div class="input-box">
+            <img src="mail-64.webp" id="icon">
+            <input type="email" name="email" autocomplete="off" required>
+            <label>Email address</label>
+          </div>
+          <div class="input-box">
+            <img src="icon-locked-64.webp" id="icon">
+            <input type="password" name="password" autocomplete="off" required>
+            <label>Password</label>
+          </div>
+          <p id="error-message"></p>
+          <div class="remember-forgot">
+            <a href="#">Forgot password?</a>
+          </div>
+          <button type="submit" class="signinBtn">Sign-In</button>
+          <div class="register">
+            <p>Don't have an account?<a href="signup.html">Sign-up</a></p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const error = params.get("error");
+
+      if (error) {
+        let message = "";
+        switch (error) {
+          case "missing":
+            message = "Please fill in all fields.";
+            break;
+          case "nomatch":
+            message = "Incorrect email or password.";
+            break;
+          case "exists":
+            message = "An account with this email already exists.";
+            break;
+          case "notfound":
+            message = "User not found. Please sign up.";
+            break;
+          case "wrongpass":
+            message = "Incorrect email or password.";
+            break;
+          default:
+            message = "An unknown error occurred.";
+        }
+        document.getElementById("error-message").textContent = message;
+      }
+    </script>
+  </body>
+</html>

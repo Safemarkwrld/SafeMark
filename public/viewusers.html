@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>View Profile</title>
+    <link rel="stylesheet" href="viewusers.css">
+  </head>
+  <body>
+    <div class="parent">
+      <div class="topbar">
+        <div class="topleft">
+          <a href="landingpage.html"><img src="arrow_left2-64.webp" alt="Back"></a>
+          <h2>View Profile</h2>
+        </div>
+
+        <button id="openmenu"><img src="Dot-More-Vertical-Menu-64.webp"></button>
+      </div>
+      <div class="more" id="more">
+        <div class="actual-menu">
+          <div class="topmenu">
+
+            <button class="closemenu" id="closemenu"><img src="closeicon2234.webp"></button>
+          </div>
+          <div class="user-actions">
+            <span>Report user</span>
+            <span>Poke user</span>
+          </div>
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-picture">
+          <img src="" alt="Profile Photo" id="profilePhoto">
+        </div>
+        <!-- User Details -->
+        <div class="details">
+          <h3 id="user-name"></h3>
+          <p id="user-email"></p>
+          <div id="user-status"></div>
+          <div class="address-verified">
+              <p id="homeAddress"></p>
+          </div>
+          <div class="below-bar">
+            <button id="request">Request</button><button id="report">Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="viewusers.js"></script>
+  </body>
+</html>

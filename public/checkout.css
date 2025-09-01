@@ -1,0 +1,510 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+html, body {
+  height: 100vh;
+}
+body {
+  background-color: white;
+  background-attachment: fixed;
+  display: flex;
+  color: black;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+
+}
+.parent{
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  width: 100%;
+  height: 100%;
+}
+.topBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 50px;
+  border-bottom: grey 2px solid;
+  border-bottom-left-radius: 10px;
+  color: #0078d4;
+
+}
+.topBar a{
+  height: 35px;
+  width: 35px;
+  
+}
+.topBar a:hover {
+  margin-top: -3px;
+}
+.topBar h2 {
+  margin-right: 10px;
+}
+#backIcon{
+  width: 100%;
+  height: 100%;
+}
+
+/*TABS STYLINGS STARTS HERE */
+.progressTabs-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  border-bottom: grey 2px solid;
+  width: 100%;
+  background-color: rgba(190, 190, 190,);
+}
+.tab {
+  padding: 5px 10px;
+  background-color: #ddd;
+  color: #444;
+  font-weight: bold;
+  pointer-events: none; /* disable clicks */
+  justify-content: space-around;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: white 2px solid;
+}
+
+.tab.active {
+  background-color: #0078d4;
+  color: white;
+  border: #0078d4 2px solid;
+  transition: background 1s ease, border-color 3s ease, color 3.5s ease;
+}
+
+.step1, .step2, .step3 {
+  display: none;
+}
+.step1.active,
+.step2.active,
+.step3.active {
+  display: block;
+  transition: background 1s ease, border-color 1s ease, color 3.5s ease;
+}
+
+
+/* Base style for the container */
+.delivery-card-sameday,
+.delivery-card-standard,
+.delivery-card-pickup {
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 5px 10px;
+  cursor: pointer;
+  background: #f9f9f9;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  display: block;
+}
+
+.delivery-card-sameday:has(input:checked) {
+  color: white;
+  background-color: #0078d4;
+  border: 2px solid #0078d4;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 5px 2px;
+  cursor: pointer;
+  transition: background 1s ease, border-color 2s ease, color 3s ease;
+  position: relative;
+  display: block;
+}
+.delivery-card-standard:has(input:checked) {
+  color: white;
+  background-color: #0078d4;
+  border: 2px solid #0078d4;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 5px 2px;
+  cursor: pointer;
+  transition: background 1s ease, border-color 2s ease, color 3s ease;
+  position: relative;
+  display: block;
+}.delivery-card-pickup:has(input:checked) {
+  color: white;
+  background-color: #0078d4;
+  border: 2px solid #0078d4;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 5px 2px;
+  cursor: pointer;
+  transition: background 1s ease, border-color 1s ease, color 3.5s ease;
+  position: relative;
+  display: block;
+}
+
+.delivery-card-sameday input[type="radio"]{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.delivery-card-standard input[type="radio"]{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.delivery-card-pickup input[type="radio"]{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.row-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+}
+
+.costprice{
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  text-align: end;
+}
+.card-icon{
+  height: 25px;
+  width: 25px;
+}
+.card-description{
+  margin-top: 10px;
+  margin-left: 10px;
+}
+.card-description h4{
+  margin-bottom: 5px;
+  max-width: 75%;
+}
+.bottom-bar{
+  background-color: white;
+  z-index: 999999;
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  width: 100%;
+  justify-content: center;
+  box-shadow: rgb(110, 110, 110, 0.2) 0 -3px 5px;
+  align-items: center;
+}
+.proceed-to-payment-btn{
+  background-color: #0078d4;
+  border: none;
+  padding: 6px 16px;
+  color: white;
+  width: 100%;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.proceed-to-payment-btn:hover{
+  background-color: #0066b4;
+}
+.proceed-to-confirmation-btn{
+  background-color: #0078d4;
+  border: none;
+  padding: 6px 16px;
+  color: white;
+  width: 100%;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.proceed-to-confirmation-btn:hover{
+  background-color: #0066b4;
+}
+.confirmation-btn{
+  background-color: #0078d4;
+  border: none;
+  padding: 6px 16px;
+  color: white;
+  width: 100%;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.confirmation-btn:hover{
+  background-color: #0066b4;
+}
+.top-navigation{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.back-btn{
+  display: flex;
+  padding: 3px;
+  border: none;
+  background-color: transparent;
+}
+.back-to-section{
+  height: 20px;
+  width: 20px;
+}
+.payment-box{
+  margin-top: 10px;
+  padding: 10px;
+}
+.payment-card{
+  display: flex;
+  flex-direction: row;
+  border: 2px #ddd solid;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  max-height: 200px;
+}
+.payment-card img{
+  height: 100%;
+  width: 100px;
+}
+.column-cont{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.item-row{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  text-align: end;
+}
+.description{
+  width: 70%;
+  max-height: 100%;
+}
+
+.total-costs{
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  padding: 0 10px;
+  color: #0078d4;
+}
+
+/*PAYMENT CARDS STYLING */
+#methods{
+  margin-top: 20px;
+}
+.confirmation-box{
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.card-with-discount{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: #f0b90b 3px solid;
+  background-color: #1e2329;
+  border-radius: 12px;
+  padding: 5px;
+  color: #FCD535;
+}
+.card-with-discount h3{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: #f0b90b;
+}
+.card-with-discount img{
+  margin-left: 5px;
+  height: 30px;
+  width: 30px;
+}
+.benefits-BNB{
+  margin-top: 10px;
+  color: #FCD535;
+  font-size: 12px;
+}
+summary {
+  cursor: pointer;
+
+}
+.benefits-BNB li{
+  margin-top: 5px;
+  max-width: 75%;
+}
+.amount-section{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: end;
+  margin-top: 20px;
+}
+#final-amount{
+  color: #f0b90b;
+  font-weight: bold;
+}
+.safemark-details{
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+#pay-heading{
+  color: #f0b90b;
+}
+.bnb-details{
+  display: flex;
+  flex-direction: column;
+}
+.bnb-details button{
+  padding: 6px 12px;
+  background-color: #f0b90b;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #1e2329;
+  font-weight: bold;
+  width: 30%;
+} .bnb-details button:hover{
+  background-color: #e6b000;
+}
+.uploadPayment{
+  display: flex;
+  flex-direction: column;
+  margin-top: 5px;
+}
+.paymentproof{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border: 1px solid #f0b90b;
+  border-radius: 999px;
+  padding-left: 10px;
+  max-width: 75%;
+  justify-content: space-between;
+}
+#proof-of-payment{
+  background-color: #f0b90b;
+  padding: 3px;
+  border: 0;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  width: 30px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 999px;
+}
+#upload-proof{
+  height: 18px;
+  width: 18px;
+}
+.cardPayment{
+  border: #ddd 2px solid;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  margin-top: 10px;
+  overflow: scroll;
+}
+.icon-logos{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: space-evenly;
+}
+.icon-logos img{
+  height: 30px;
+  width: 30px;
+}
+.banking-details{
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+  color: silver;
+}
+.card-number{
+  display: flex;
+  flex-direction: column;
+}
+.banking-details input{
+  background-color: transparent;
+  outline: none;
+  border: none;
+  color: silver;
+  border-bottom: 1px solid silver;
+  margin-bottom: 8px;
+}
+.exp-csc{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.csc{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.card-security{
+  display: flex;
+  flex-direction: column;
+}
+.card-icon{
+  display: flex;
+}
+#card-icon{
+  height: 30px;
+  width: 30px;
+}
+
+.amount{
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+
+}
+.amount h4{
+  color: grey;
+  font-weight: bold;
+  border-bottom: silver 1px solid;
+}
+.cardPayment button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 999px;
+  color: #ffff;
+  background-color: #169bd7;
+  align-self: center;
+} .cardPayment button:hover{
+  background-color: #1697d3;
+}
+#infoLinks{
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  justify-self: end;
+  text-align: end;
+  margin-left: 3px;
+}
+#ootcLink{
+  text-decoration: none;
+  color: #0078d4;
+  font-weight: bold;
+  justify-self: end;
+  text-align: end;
+  margin-left: 3px;
+}
+.seller-delivery-group{
+  margin-top: 20px;
+}

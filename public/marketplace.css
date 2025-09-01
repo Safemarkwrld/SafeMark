@@ -1,0 +1,488 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+html {
+  height: 100vh;
+}
+body {
+  background-image: url("file_00000000f36061f69a288b51c145c8d7.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  display: flex;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  height: 100vh;
+}
+.parentcont{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  backdrop-filter: blur(20px);
+}
+.topbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  border: rgb(255, 255, 255, 0.2) 0.3px solid;
+  box-shadow: rgba(0, 0, 0, 0.5) 0 -5px 5px;
+  background-color: rgba(99, 99, 99, 0.2);
+  backdrop-filter: blur(20px);
+  border: rgb(255, 255, 255, 0.2) 0.3px solid;
+  align-items: center;
+  position: relative;
+  height: 50px;
+}
+.topbar img {
+  width: 25px;
+  height: 25px;
+  margin-left: 5px;
+}
+.topbar h2 {
+  margin-right: 10px;
+}
+
+/*HERE ARE THE STYLESHEETS OF ALL TABS*/
+.tabs-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  min-height: 30px;
+  font-size: 12px;
+  border-bottom: rgb(101, 142, 255, 0.6) 3px solid;
+  box-shadow: rgb(255, 255, 255, 0.5) 0 0 5px;
+  backdrop-filter: blur(100px);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 999999;
+}
+
+
+/*LET'S LEAVE SPACE FOR TABS STYLINGS */
+.tab {
+  cursor: pointer;
+    height: 100%;
+  width: 25%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 100;
+
+}
+.tab.active {
+  font-weight: bold;
+  color: white;
+  padding-bottom: 5px;
+  border-bottom: white 2px solid;
+  height: 100%;
+  width: 25%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: -5px;
+}
+
+
+
+
+
+/*TABS OUTPUT STYLING STARTS HERE */
+
+.tabsOutput-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  color: black;
+}
+
+.tab-panel {
+  display: none;
+}
+.tab-panel.active {
+  display:  flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  height: 100%;
+}
+.create-listing{
+  padding: 10px;
+}
+.create-listing button {
+  width: 100%;
+  padding: 7.5px;
+  border: none;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  cursor: pointer;
+  margin-bottom: 10px;
+  position: fixed;
+  bottom: 10%;
+  background-color: transparent;
+}
+.create-listing button:hover{
+  background-color: rgba(124, 127, 134, 0.1);
+}
+.tabsOutput-container #sell-items .create-listing{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+
+}
+#added-items{
+  height: 100%;
+  overflow: scroll;
+  max-height: 80vh;
+}
+#your-listing{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+margin-top: 10px;
+}
+/*CREAYE LISTING FORM STYLE SHEETS */
+.createlist-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: rgba(0, 0, 0, 0.5) 0.5px solid;
+  background-color: rgba(59, 59, 59, 0.1);
+  box-shadow: white 0 0 5px;
+  border-radius: 10px;
+  padding: 10px;
+}
+.createlist-form h3 {
+  margin-bottom: 10px;
+}
+.input-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.input-form input{
+  background-color: transparent;
+  outline: none;
+  border: rgb(0, 0, 0) 1px solid;
+  border-radius: 10px;
+  height: 25px;
+  text-align: center;
+  color: black;
+}
+.fileInput-form{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.fileInput-form input {
+  background-color: transparent;
+  outline: none;
+}
+#publishBtn{
+  width: 100%;
+  padding: 7.5px;
+  border: none;
+  border-radius: 999px;
+  background-color: rgba(0, 68, 255, 0.2);
+  backdrop-filter: blur(20px);
+  box-shadow: rgb(255, 255, 255, 0.2) 0 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+/*SEARCH TAB OUTPUT */
+.search-container {
+  display: flex;
+  height: 30px;
+  width: 100%;
+  position: relative;
+  border: rgba(0, 0, 0, 0.5) 1px solid;
+  border-radius: 999px;
+  backdrop-filter: blur(100px);
+  margin-bottom: 5px;
+  margin-top: 10px;
+
+}
+.search-container input {
+  bottom: 0;
+  height: 70%;
+  width: 90%;
+  position: absolute;
+  border: none;
+  background-color: transparent;
+  outline: none;
+  color: black;
+  margin-left: 10px;
+}
+.search-container button {
+  background-color: transparent;
+  height: 100%;
+  width: 40px;
+  position: absolute;
+  right: 0;
+  border: none;
+  cursor: pointer;
+}
+.search-container label{
+  position: absolute;
+  bottom: 0;
+  margin-left: 10px;
+}
+
+.search-container input:focus~label,
+.search-container input:valid~label {
+    top: -7px;
+    font-size: 11px;
+    background-color: white;
+    height: 10px;
+}
+
+.search-container .search-icon {
+  height: 20px;
+  width: 20px;
+
+}
+search-results {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===========ITEM CARD STYLINGS=============*/
+/* myItem-card          */
+.myItem-card{
+  display: flex;
+  flex-direction: row;
+  border-top: 2px grey solid;
+  border-bottom: 2px grey solid;
+  width: 100%;
+  max-height: 220px;
+  overflow: scroll;
+}
+.itemCard-container{
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+  width: 100%;
+
+}
+.item-thumb{
+  height: 100%;
+  max-height: 200px;
+  min-width: 150px;
+  width: 150px;
+  border-right: 2px rgb(199, 199, 199) solid;
+  margin-right: 2px;
+}
+.item-details{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  overflow: scroll;
+}
+.right-box{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  align-items: end;
+}
+.iconAndPrice{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.iconAndPrice .priceTag-icon{
+  height: 15px;
+  width: 15px;
+}
+.iconAndPrice h3{
+  border-bottom: 1px black solid;
+}
+
+.delete-item-btn{
+  border: none;
+  background-color: transparent;
+  display: contents;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+.binIcon{
+  height: 20px;
+  width: 20px;
+
+}
+/*Search item card*/
+.searchItem-card{
+  display: flex;
+  flex-direction: row;
+  border-top: 2px grey solid;
+  border-bottom: 2px grey solid;
+  width: 100%;
+}
+
+
+/*CART item card*/
+.cartItem-card{
+  display: flex;
+  flex-direction: row;
+  border-top: 2px grey solid;
+  border-bottom: 2px grey solid;
+  max-height: 220px;
+  width: 100%;
+}
+.seller-details{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top:8px;
+  margin-left: 3px;
+}
+.seller-link{
+  text-decoration: none;
+  color: #0078d4;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+#seller-profile-photo{
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  border: grey 1px solid;
+  margin-right: 3px;
+}
+
+.purchase-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  position: relative;
+  cursor: pointer;
+  width: 100%;
+}
+
+.purchase-options input[type="radio"] {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.purchase-options label {
+  padding: 6px 12px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#infoLinks{
+  text-decoration: none;
+  color: #0078d4;
+  font-weight: bold;
+  justify-self: end;
+  text-align: end;
+}
+/* default (not checked) */
+.purchase-options input[type="radio"] + label {
+  background-color: #f9f9f9;
+  color: #333;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* when checked */
+.purchase-options input[type="radio"]:checked + label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: #0078d4;
+  background-color: #0078d4;
+  color: white;
+  font-weight: bold;
+  width: 100%;
+}
+
+
+
+
+
+.remove-cart-btn{
+  border: none;
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
+
+.cart-footer {
+  flex-direction: column;
+  width: 100%;
+  background: #fff;
+  border-top: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+
+.cart-footer.hidden {
+  display: none;
+}
+
+.proceed-to-checkout-btn {
+  background: #0078d4;
+  color: white;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.proceed-to-checkout-btn:hover {
+  background: #0056b3;
+}

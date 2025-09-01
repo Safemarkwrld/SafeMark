@@ -1,0 +1,78 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Poppins, Arial, sans-serif;
+    background-image: url("file_00000000f36061f69a288b51c145c8d7.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    color: white;
+    align-items: center;
+}
+.container{
+    display: flex;
+    flex-direction: column;
+    border: rgb(255, 255, 255, 0.3) 0.2px solid;
+    box-shadow: rgb(255, 255, 255, 0.5) 0 0 10px;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(20px);
+    align-items: center;
+}
+.container label{
+    font-size: 12px;
+    font-weight: bold;
+}
+.container input{
+    height: 25px;
+    border-radius: 4px;
+    background-color: rgb(255, 255, 255, 0.2);
+    outline: none;
+    border: 0.1px solid rgb(255, 255, 255, 0.2);
+    box-shadow: rgb(255, 255, 255, 0.3) 0 0 7px;
+    color: white;
+}
+.step{
+    display: none;
+}
+.step.active{
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    width: 100%;
+}
+.step.active button{
+    margin-top: 7px;
+    display: flex;
+    flex-direction: column;
+    padding: 7px;
+    border: none;
+    border-radius: 999px;
+    align-items: center;
+    justify-content: center;
+    background-color: #0078d4;
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+}
+.step.active button:hover{
+    background-color: #006dd4;
+}
+.step.active label{
+    margin-top: 5px;
+}
+
+#googlemapsIcon{
+    height: 18px;
+    width: 18px;
+    background-color: white;
+    border-radius: 50%;
+}

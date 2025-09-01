@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SafeMark - Sign-up</title>
+    <link rel="stylesheet" href="signup.css">
+  </head>
+  <body>
+    <div class="outerCont">
+      <h1>SafeMark</h1>
+      <h3>Welcome</h3>
+      <h4>Register now</h4>
+      <div class="detailsCont">
+        <!-- add id here -->
+        <form action="/signup" method="post" enctype="application/x-www-form-urlencoded">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+          <div class="input-box">
+            <img src="mail-64.webp" id="icon">
+            <input type="email" name="email" required>
+            <label>Email address</label>
+          </div>
+
+          <div class="input-box">
+            <img src="icons_user2-64.webp" id="icon">
+            <input type="text" name="firstName" required>
+            <label>First name</label>
+          </div>
+
+          <div class="input-box">
+            <img src="icons_user2-64.webp" id="icon">
+            <input type="text" name="lastName" required>
+            <label>Last name</label>
+          </div>
+
+          <div class="input-box">
+            <img src="icon-locked-64.webp" id="icon">
+            <input type="password" name="password" required>
+            <label>Password</label>
+          </div>
+
+          <div class="input-box">
+            <img src="icon-locked-64.webp" id="icon">
+            <input type="password" name="confirmpassword" required>
+            <label>Confirm password</label>
+          </div>
+
+          <button type="submit" class="signupBtn">Sign-Up</button>
+
+          <div class="signin">
+            <p>Already have an account? <a href="login.html">Sign-in</a></p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="signup.js">
+    </script>
+  </body>
+</html>

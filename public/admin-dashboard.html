@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+  </head>
+  <body>
+      <div class="topbar">
+        <div class="headcont">
+          <h3>Admin Dashboard</h3>
+        </div>
+        
+      
+        <div class="tabs-container">
+          <div class="tab active" onclick="showSection('livechat')">live chat</div>
+          <div class="tab" onclick="showSection('verifications')">verifications</div>
+          <div class="tab" onclick="showSection('more')">more</div>
+        </div>
+      </div>
+      <div class="tab-panel active" id="livechat"></div>
+      <div class="tab-panel" id="verifications">
+        <div class="verification-Card">
+          <h3>Pending Verifications</h3>
+          <div id="pendingUsers"></div>
+    
+          <template id="userTemplate">
+            <div class="user-card">
+              <div class="firstCont">
+                <div class="details">
+                  <h5 class="username"></h5>
+                  <p class="userEmail"></p>
+                </div>
+                <div class="buttons">
+                    <button class="rejectBtn">Reject</button>
+                    <button class="approveBtn">Approve</button>
+
+                  </div>
+              </div>
+              <div class="docs">
+                <div class="preview-images">
+                  <p>ID Front:</p>
+                  <img class="idFront" src="" alt="ID Front">
+                </div>
+                <div class="preview-images">
+                  <p>ID Back:</p>
+                  <img class="idBack" src="" alt="ID Back">
+                </div>
+                <div class="preview-images">
+                  <p>Selfie:</p>
+                  <img class="selfie" src="" alt="Selfie">
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="tab-panel" id="more">
+        <!-- Pending Payments Section -->
+          <section id="pending-payments">
+        <h2>Pending Payment Proofs</h2>
+        <div id="payments-list" class="payments-list"></div>
+      </div>
+    <script src="admin-dashboard.js"></script>
+  </body>
+</html>
