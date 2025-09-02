@@ -553,7 +553,7 @@ function renderDeliveryCard(type, title, dist, fee, cost, icon, description, sel
       </div>
       <div class="card-description">
         <p>${description}</p>
-        ${type === "pickup" ? `<p class="seller-address" data-seller="${sellerId}">Loading address...</p>` : ""}
+        ${type === "pickup" ? `<p><b>Address:</b></p><p class="seller-address" data-seller="${sellerId}">Loading address...</p>` : ""}
       </div>
     </div>`;
 }

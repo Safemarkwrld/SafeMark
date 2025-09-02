@@ -7,6 +7,34 @@ const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
 
+const cloudinary = require("cloudinary").v2;
+const { Readable } = require("stream");
+
+// -------------------- Cloudinary Config --------------------
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Helper to upload a buffer to Cloudinary and return secure_url
+async function uploadToCloudinary(buffer, folder = "safemark", publicId = undefined) {
+  return new Promise((resolve, reject) => {
+    const opts = { folder };
+    if (publicId) opts.public_id = publicId;
+    const uploadStream = cloudinary.uploader.upload_stream(opts, (err, result) => {
+      if (err) return reject(err);
+      resolve(result.secure_url);
+    });
+
+    const readStream = new Readable();
+    readStream._read = () => {};
+    readStream.push(buffer);
+    readStream.push(null);
+    readStream.pipe(uploadStream);
+  });
+}
+
 const app = express();
 
 // -------------------- Middleware --------------------
@@ -124,7 +152,7 @@ const paymentSchema = new mongoose.Schema({
   discount: { type: Number, default: 0 },
   finalAmount: { type: Number, required: true },   // after discount
 
-  // file path served from /uploads
+  // file path (Cloudinary URL)
   proofPath: { type: String, required: true },
 
   // workflow
@@ -199,54 +227,22 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// -------------------- File Uploads --------------------
+// -------------------- File Uploads (Cloudinary + memory) --------------------
 const uploadMemory = multer({ storage: multer.memoryStorage() });
 
-// Items storage
-const itemStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "public", "uploads/items");
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const uploadItem = multer({ storage: itemStorage });
+// Reusable multer handlers that use memory storage only (we upload the buffers to Cloudinary inside routes)
+const uploadItem = uploadMemory.array("images", 5); // items images
+const uploadProfile = uploadMemory.single("profilePhoto"); // profile photo
+const uploadPaymentProof = uploadMemory.single("proof"); // payment proof
+const uploadVerification = uploadMemory.fields([
+  { name: "idFront", maxCount: 1 },
+  { name: "idBack", maxCount: 1 },
+  { name: "selfie", maxCount: 1 },
+]);
 
-// Verification storage
-
-
-// Profile photo storage
-const profileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "public", "uploads/profile");
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${req.session.userId}${path.extname(file.originalname)}`);
-  },
-});
-const uploadProfile = multer({ storage: profileStorage });
-
+// Keep static /uploads route for backward compatibility (optional)
 app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 
-// Payment proof storage
-const paymentProofStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "public", "uploads/payment-proof");
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const uploadPaymentProof = multer({ storage: paymentProofStorage });
 // -------------------- Routes --------------------
 // Public pages
 app.get("/", (req, res) =>
@@ -325,30 +321,13 @@ app.post("/login", async (req, res) => {
 });
 
 //======================VERIFICATION ROUTES======================
-//======================VERIFICATION ROUTES======================
-//======================VERIFICATION ROUTES======================
-//======================VERIFICATION ROUTES======================
-
-// -------------------- Multer Setup --------------------
-
-// Ensure uploads directory exists
+// Ensure uploads directory exists (kept for compatibility — not used for new uploads)
 const uploadDir = path.join(__dirname, "public", "uploads", "verification");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure Multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
-// File filter (only images + pdf allowed)
+// File filter helper (used only for client-side validation if needed)
 function fileFilter(req, file, cb) {
   const allowed = /jpeg|jpg|png|pdf/;
   const ext = path.extname(file.originalname).toLowerCase();
@@ -359,17 +338,11 @@ function fileFilter(req, file, cb) {
   }
 }
 
-const uploadVerification = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter,
-});
-// ====================== VERIFICATION ROUTES ======================
 
 // -------------------- Verification Submit --------------------
 app.post(
   "/verification/submit",
-  uploadVerification.fields([
+  uploadMemory.fields([
     { name: "idFront", maxCount: 1 },
     { name: "idBack", maxCount: 1 },
     { name: "selfie", maxCount: 1 },
@@ -394,6 +367,19 @@ app.post(
         return res.status(400).json({ error: "Latitude/Longitude must be within South Africa." });
       }
 
+      // ✅ Upload files to Cloudinary
+      const uploadToCloudinary = async (file, folder) => {
+        if (!file) return null;
+        const b64 = file.buffer.toString("base64");
+        const dataURI = `data:${file.mimetype};base64,${b64}`;
+        const result = await cloudinary.uploader.upload(dataURI, { folder });
+        return result.secure_url;
+      };
+
+      const idFrontUrl = await uploadToCloudinary(req.files["idFront"]?.[0], "verification");
+      const idBackUrl = await uploadToCloudinary(req.files["idBack"]?.[0], "verification");
+      const selfieUrl = await uploadToCloudinary(req.files["selfie"]?.[0], "verification");
+
       // Save or overwrite verification
       await Verification.findOneAndUpdate(
         { userId },
@@ -405,15 +391,9 @@ app.post(
           email,
           phone,
           droppedPin: { lat, lon },
-          idFront: req.files["idFront"]
-            ? `/uploads/verification/${req.files["idFront"][0].filename}`
-            : null,
-          idBack: req.files["idBack"]
-            ? `/uploads/verification/${req.files["idBack"][0].filename}`
-            : null,
-          selfie: req.files["selfie"]
-            ? `/uploads/verification/${req.files["selfie"][0].filename}`
-            : null,
+          idFront: idFrontUrl,
+          idBack: idBackUrl,
+          selfie: selfieUrl,
           submittedAt: new Date(),
         },
         { upsert: true, new: true }
@@ -430,16 +410,13 @@ app.post(
   }
 );
 
-
 // -------------------- Admin Get Pending Verifications --------------------
 app.get("/verification/pending", async (req, res) => {
   try {
     const pendingUsers = await Verification.find({}).populate("userId");
 
-    // Filter: only show if user is pending
     const users = await User.find({ pending: true });
 
-    // merge user data with verification docs
     const merged = users.map(u => {
       const v = pendingUsers.find(v => v.userId.toString() === u.userId.toString());
       return {
@@ -463,12 +440,7 @@ app.get("/verification/pending", async (req, res) => {
 app.post("/verification/approve/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-
-    await User.updateOne(
-      { userId },
-      { $set: { verified: true, pending: false } }
-    );
-
+    await User.updateOne({ userId }, { $set: { verified: true, pending: false } });
     res.json({ success: true, message: "✅ User approved" });
   } catch (err) {
     console.error("Approve error:", err);
@@ -480,12 +452,7 @@ app.post("/verification/approve/:userId", async (req, res) => {
 app.post("/verification/reject/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-
-    await User.updateOne(
-      { userId },
-      { $set: { verified: false, pending: false } }
-    );
-
+    await User.updateOne({ userId }, { $set: { verified: false, pending: false } });
     res.json({ success: true, message: "❌ User rejected" });
   } catch (err) {
     console.error("Reject error:", err);
@@ -494,20 +461,13 @@ app.post("/verification/reject/:userId", async (req, res) => {
 });
 
 //=============PROFILE CHECKINSS===============
-// ✅ Get logged-in buyer info (with droppedPin from Verification)
 app.get("/api/me", async (req, res) => {
   try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: "Not logged in" });
-    }
+    if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
 
-    // Find the user using userId (string), not _id
     const user = await User.findOne({ userId: req.session.userId });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Find verification record for droppedPin (string match again)
     const verification = await Verification.findOne({ userId: user.userId });
     if (!verification || !verification.droppedPin) {
       return res.status(404).json({ error: "No buyer droppedPin found" });
@@ -525,7 +485,6 @@ app.get("/api/me", async (req, res) => {
 });
 
 // -------------------- Profile API --------------------
-// -------------------- Profile API --------------------
 app.get("/api/profile", requireLogin, async (req, res) => {
   try {
     const user = await User.findOne(
@@ -534,7 +493,6 @@ app.get("/api/profile", requireLogin, async (req, res) => {
     );
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // ✅ fetch verification address
     const verification = await Verification.findOne(
       { userId: req.session.userId },
       "address"
@@ -550,21 +508,21 @@ app.get("/api/profile", requireLogin, async (req, res) => {
   }
 });
 
-app.post("/api/profile-photo", requireLogin, uploadProfile.single("profilePhoto"), async (req, res) => {
+// ✅ Profile photo → Cloudinary
+app.post("/api/profile-photo", requireLogin, uploadMemory.single("profilePhoto"), async (req, res) => {
   try {
-    const userId = req.session.userId;
-    const newFile = req.file;
-    if (!newFile) return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const dir = path.join(__dirname, "public", "uploads/profile");
-    fs.readdirSync(dir).forEach(file => {
-      if (file.startsWith(userId) && file !== newFile.filename) {
-        fs.unlinkSync(path.join(dir, file));
-      }
-    });
+    const b64 = req.file.buffer.toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    const result = await cloudinary.uploader.upload(dataURI, { folder: "profile" });
 
-    await User.updateOne({ userId }, { $set: { profileIcon: true } });
-    res.json({ message: "✅ Profile photo updated", userId });
+    await User.updateOne(
+      { userId: req.session.userId },
+      { $set: { profileIcon: result.secure_url } }
+    );
+
+    res.json({ message: "✅ Profile photo updated", url: result.secure_url });
   } catch (err) {
     console.error("Profile upload error:", err);
     res.status(500).json({ error: "Failed to upload profile photo" });
@@ -573,14 +531,9 @@ app.post("/api/profile-photo", requireLogin, uploadProfile.single("profilePhoto"
 
 app.get("/api/profile-photo/:userId", async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const dir = path.join(__dirname, "public", "uploads/profile");
-    if (!fs.existsSync(dir)) return res.status(404).send("No photo");
-
-    const files = fs.readdirSync(dir).filter(f => f.startsWith(userId));
-    if (files.length === 0) return res.status(404).send("No photo");
-
-    res.sendFile(path.join(dir, files[0]));
+    const user = await User.findOne({ userId: req.params.userId });
+    if (!user || !user.profileIcon) return res.status(404).send("No photo");
+    res.json({ url: user.profileIcon });
   } catch (err) {
     console.error("Profile fetch error:", err);
     res.status(500).send("Failed to fetch photo");
@@ -589,18 +542,7 @@ app.get("/api/profile-photo/:userId", async (req, res) => {
 
 app.delete("/api/profile-photo", requireLogin, async (req, res) => {
   try {
-    const userId = req.session.userId;
-    const dir = path.join(__dirname, "public", "uploads/profile");
-
-    if (fs.existsSync(dir)) {
-      fs.readdirSync(dir).forEach(file => {
-        if (file.startsWith(userId)) {
-          fs.unlinkSync(path.join(dir, file));
-        }
-      });
-    }
-
-    await User.updateOne({ userId }, { $set: { profileIcon: false } });
+    await User.updateOne({ userId: req.session.userId }, { $set: { profileIcon: null } });
     res.json({ message: "✅ Profile photo deleted" });
   } catch (err) {
     console.error("Profile delete error:", err);
@@ -633,27 +575,35 @@ app.get("/api/users/:userId", async (req, res) => {
 });
 
 // -------------------- Marketplace Routes --------------------
-app.post("/items/add", requireLogin, uploadItem.array("images", 5), async (req, res) => {
+app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req, res) => {
   try {
     const productCode = await getNextProductCode();
-    const imagePaths = (req.files || []).map(file => `/uploads/items/${file.filename}`);
 
-    // ✅ get seller verification pin
-const verification = await Verification.findOne({ userId: req.session.userId });
-if (!verification || !verification.droppedPin) {
-  return res.status(400).json({ error: "You must set a dropped pin before listing items" });
-}
+    // ✅ Upload item images to Cloudinary
+    const uploadToCloudinary = async file => {
+      const b64 = file.buffer.toString("base64");
+      const dataURI = `data:${file.mimetype};base64,${b64}`;
+      const result = await cloudinary.uploader.upload(dataURI, { folder: "items" });
+      return result.secure_url;
+    };
 
-const newItem = new Item({
-  productCode,
-  ownerId: req.session.userId,
-  name: req.body.name,
-  description: req.body.description,
-  price: Number(req.body.price),
-  quantity: Number(req.body.quantity),
-  images: imagePaths,
-  droppedPin: verification.droppedPin, // ✅ seller location saved
-});
+    const imageUrls = await Promise.all((req.files || []).map(file => uploadToCloudinary(file)));
+
+    const verification = await Verification.findOne({ userId: req.session.userId });
+    if (!verification || !verification.droppedPin) {
+      return res.status(400).json({ error: "You must set a dropped pin before listing items" });
+    }
+
+    const newItem = new Item({
+      productCode,
+      ownerId: req.session.userId,
+      name: req.body.name,
+      description: req.body.description,
+      price: Number(req.body.price),
+      quantity: Number(req.body.quantity),
+      images: imageUrls,
+      droppedPin: verification.droppedPin,
+    });
 
     await newItem.save();
     res.redirect("/marketplace.html");
@@ -669,7 +619,7 @@ app.get("/items/mine", requireLogin, async (req, res) => {
     res.json(items);
   } catch (err) {
     console.error("Get items error:", err);
-    res.status(500).send("Failed to fetch seller items");
+    res.status(500).json({ error: "Failed to fetch seller items" });
   }
 });
 
@@ -678,12 +628,7 @@ app.delete("/items/:id", requireLogin, async (req, res) => {
     const item = await Item.findOne({ _id: req.params.id, ownerId: req.session.userId });
     if (!item) return res.status(404).send("Item not found or not authorized");
 
-    item.images.forEach(imgPath => {
-      const safeRel = imgPath.replace(/^\//, "");
-      const filePath = path.join(__dirname, "public", safeRel);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    });
-
+    // ✅ Optionally: remove from Cloudinary if needed (requires storing public_id)
     await item.deleteOne();
     res.send("✅ Item deleted");
   } catch (err) {
@@ -704,7 +649,9 @@ app.get("/items/search", requireLogin, async (req, res) => {
         const seller = await User.findOne({ userId: item.ownerId }, "firstName lastName");
         return {
           ...item.toObject(),
-          seller: seller ? { userId: item.ownerId, firstName: seller.firstName, lastName: seller.lastName } : null,
+          seller: seller
+            ? { userId: item.ownerId, firstName: seller.firstName, lastName: seller.lastName }
+            : null,
         };
       })
     );
@@ -737,14 +684,14 @@ app.get("/api/cart", requireLogin, async (req, res) => {
           name: product.name,
           description: product.description,
           price: product.price,
-          images: product.images,
+          images: product.images, // ✅ Cloudinary URLs stored in DB
           quantity: cartItem.quantity,
           seller: seller
             ? {
                 userId: seller.userId,
                 firstName: seller.firstName,
                 lastName: seller.lastName,
-                profileIcon: seller.profileIcon,
+                profileIcon: seller.profileIcon, // ✅ should also be Cloudinary URL
               }
             : null,
           droppedPin: product.droppedPin || null,  // ✅ Include seller location
@@ -916,7 +863,6 @@ checkoutRouter.post("/create", requireLogin, async (req, res) => {
   }
 });
 
-// 2️⃣ Get current checkout
 // 2️⃣ Get current checkout (with item images & ensured seller pin)
 checkoutRouter.get("/get", requireLogin, async (req, res) => {
   try {
@@ -947,13 +893,11 @@ checkoutRouter.get("/get", requireLogin, async (req, res) => {
               productCode: it.productCode,
               name: it.name ?? prod?.name ?? "",
               quantity: it.quantity,
-              // prefer updatedPrice; fallback to product price; final fallback 0
               updatedPrice:
                 typeof it.updatedPrice === "number"
                   ? it.updatedPrice
                   : (typeof prod?.price === "number" ? prod.price : 0),
-              // first image (absolute path already served by /uploads)
-              image: prod?.images?.[0] || null,
+              image: prod?.images?.[0] || null, // ✅ Cloudinary URL (first image)
             };
           })
         );
@@ -1005,63 +949,89 @@ checkoutRouter.post("/finalize", requireLogin, async (req, res) => {
 });
 
 
-app.post("/api/payments/upload-proof", requireLogin, uploadPaymentProof.single("proof"), async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { amount, method } = req.body;
+// -------------------- Payment Proof Upload --------------------
+app.post(
+  "/api/payments/upload-proof",
+  requireLogin,
+  uploadMemory.single("proof"),
+  async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const { amount, method } = req.body;
 
-    // Fetch active checkout
-    const checkout = await Checkout.findOne({ userId });
-    if (!checkout) return res.status(400).json({ error: "No active checkout found" });
+      // Fetch active checkout
+      const checkout = await Checkout.findOne({ userId });
+      if (!checkout) return res.status(400).json({ error: "No active checkout found" });
 
-    // Save payment record
-    const payment = new Payment({
-      userId,
-      method,
-      originalTotal: Number(amount),
-      discount: Number(amount) * 0.15, // your front-end discount logic
-      finalAmount: Number(amount) * 0.85,
-      proofPath: req.file?.filename || null,
-      checkoutSnapshot: checkout.toObject(),
-      status: "pending",
-    });
-    await payment.save();
+      let proofUrl = null;
 
-    // Save order record
-    const order = new Order({
-      buyerId: userId,
-      paymentId: payment._id,
-      checkoutSnapshot: checkout.toObject(),
-      sellers: checkout.sellers.map(s => ({
-        sellerId: s.sellerId,
-        sellerDroppedPin: s.sellerDroppedPin,
-        items: s.items.map(it => ({
-          productCode: it.productCode,
-          name: it.name,
-          quantity: it.quantity,
-          price: it.updatedPrice || it.price,
-          image: it.image || "",
+      if (req.file) {
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload_stream(
+          { folder: "payment_proofs" },
+          (error, result) => {
+            if (error) throw error;
+            proofUrl = result.secure_url;
+          }
+        );
+
+        // Write the buffer into the stream
+        const streamifier = require("streamifier");
+        streamifier.createReadStream(req.file.buffer).pipe(result);
+      }
+
+      // Save payment record
+      const payment = new Payment({
+        userId,
+        method,
+        originalTotal: Number(amount),
+        discount: Number(amount) * 0.15, // your front-end discount logic
+        finalAmount: Number(amount) * 0.85,
+        proofPath: proofUrl,
+        checkoutSnapshot: checkout.toObject(),
+        status: "pending",
+      });
+      await payment.save();
+
+      // Save order record
+      const order = new Order({
+        buyerId: userId,
+        paymentId: payment._id,
+        checkoutSnapshot: checkout.toObject(),
+        sellers: checkout.sellers.map((s) => ({
+          sellerId: s.sellerId,
+          sellerDroppedPin: s.sellerDroppedPin,
+          items: s.items.map((it) => ({
+            productCode: it.productCode,
+            name: it.name,
+            quantity: it.quantity,
+            price: it.updatedPrice || it.price,
+            image: it.image || "",
+          })),
         })),
-      })),
-      totalAmount: Number(amount),
-      orderStatus: false,
-    });
-    await order.save();
+        totalAmount: Number(amount),
+        orderStatus: false,
+      });
+      await order.save();
 
-    // Clear checkout
-    await Checkout.deleteOne({ userId });
+      // Clear checkout
+      await Checkout.deleteOne({ userId });
 
-    return res.json({ success: true, message: "Payment proof uploaded. Order pending approval." });
-  } catch (err) {
-    console.error("Payment proof error:", err);
-    return res.status(500).json({ error: "Server error uploading payment proof" });
+      return res.json({ success: true, message: "Payment proof uploaded. Order pending approval." });
+    } catch (err) {
+      console.error("Payment proof error:", err);
+      return res.status(500).json({ error: "Server error uploading payment proof" });
+    }
   }
-});
+);
 
+// -------------------- Get My Orders --------------------
 app.get("/api/orders/my", requireLogin, async (req, res) => {
   try {
     const userId = req.session.userId;
-    const order = await Order.findOne({ buyerId: userId }).sort({ createdAt: -1 }).populate("paymentId");
+    const order = await Order.findOne({ buyerId: userId })
+      .sort({ createdAt: -1 })
+      .populate("paymentId");
 
     if (!order) return res.json({ success: false, order: null });
 
@@ -1071,7 +1041,8 @@ app.get("/api/orders/my", requireLogin, async (req, res) => {
     return res.status(500).json({ success: false, error: "Server error fetching order" });
   }
 });
-// Get current checkout for logged-in user
+
+// -------------------- Get Checkout --------------------
 app.get("/api/checkout/get", requireLogin, async (req, res) => {
   try {
     const checkout = await Checkout.findOne({ userId: req.session.userId });
@@ -1084,10 +1055,9 @@ app.get("/api/checkout/get", requireLogin, async (req, res) => {
   }
 });
 
-
 app.use("/api/checkout", checkoutRouter);
 
-
+// -------------------- Server Start --------------------
 async function startServer(app) {
   try {
     const MONGO_URI = process.env.MONGODB_URI;
