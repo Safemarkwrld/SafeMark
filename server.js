@@ -16,24 +16,36 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Helper to upload a buffer to Cloudinary and return secure_url
-async function uploadToCloudinary(buffer, folder = "safemark", publicId = undefined) {
-  return new Promise((resolve, reject) => {
-    const opts = { folder };
-    if (publicId) opts.public_id = publicId;
-    const uploadStream = cloudinary.uploader.upload_stream(opts, (err, result) => {
-      if (err) return reject(err);
-      resolve(result.secure_url);
-    });
+async function uploadToCloudinary(buffer, folder = "safemark", publicId) {
+  if (!buffer) return null;
 
-    const readStream = new Readable();
-    readStream._read = () => {};
-    readStream.push(buffer);
-    readStream.push(null);
-    readStream.pipe(uploadStream);
+  if (!process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET) {
+    console.warn("Cloudinary env variables missing!");
+    return null;
+  }
+
+  return new Promise((resolve, reject) => {
+    try {
+      const opts = { folder };
+      if (publicId) opts.public_id = publicId;
+
+      const uploadStream = cloudinary.uploader.upload_stream(opts, (err, result) => {
+        if (err) return reject(err);
+        resolve(result.secure_url);
+      });
+
+      const readStream = new Readable();
+      readStream._read = () => {};
+      readStream.push(buffer);
+      readStream.push(null);
+      readStream.pipe(uploadStream);
+    } catch (err) {
+      reject(err);
+    }
   });
 }
-
 const app = express();
 
 // -------------------- Middleware --------------------
@@ -560,30 +572,25 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
     const productCode = await getNextProductCode();
 
     // ✅ Upload item images to Cloudinary (store url + public_id)
-    uploadToCloudinary = async file => {
-      const b64 = file.buffer.toString("base64");
-      const dataURI = `data:${file.mimetype};base64,${b64}`;
-      const result = await cloudinary.uploader.upload(dataURI, { folder: "items" });
-      return { url: result.secure_url, public_id: result.public_id };
-    };
+    const uploadToCloudinaryItem = async file => {
+  const b64 = file.buffer.toString("base64");
+  const dataURI = `data:${file.mimetype};base64,${b64}`;
+  const result = await cloudinary.uploader.upload(dataURI, { folder: "items" });
+  return result.secure_url; // only URL
+};
 
-    const images = await Promise.all((req.files || []).map(file => uploadToCloudinary(file)));
+const images = await Promise.all((req.files || []).map(file => uploadToCloudinaryItem(file)));
 
-    const verification = await Verification.findOne({ userId: req.session.userId });
-    if (!verification || !verification.droppedPin) {
-      return res.status(400).json({ error: "You must set a dropped pin before listing items" });
-    }
-
-    const newItem = new Item({
-      productCode,
-      ownerId: req.session.userId,
-      name: req.body.name,
-      description: req.body.description,
-      price: Number(req.body.price),
-      quantity: Number(req.body.quantity),
-      images, // ✅ Cloudinary objects stored
-      droppedPin: verification.droppedPin,
-    });
+const newItem = new Item({
+  productCode,
+  ownerId: req.session.userId,
+  name: req.body.name,
+  description: req.body.description,
+  price: Number(req.body.price),
+  quantity: Number(req.body.quantity),
+  images, // ✅ now only URLs
+  droppedPin: verification.droppedPin,
+});
 
     await newItem.save();
     res.redirect("/marketplace.html");
@@ -599,7 +606,7 @@ app.get("/items/mine", requireLogin, async (req, res) => {
     // Return only URLs for client
     const sanitized = items.map(i => ({
       ...i.toObject(),
-      images: i.images.map(img => img.url),
+      images: i.images
     }));
     res.json(sanitized);
   } catch (err) {
@@ -646,7 +653,7 @@ app.get("/items/search", requireLogin, async (req, res) => {
         const seller = await User.findOne({ userId: item.ownerId }, "firstName lastName");
         return {
           ...item.toObject(),
-          images: item.images.map(img => img.url), // ✅ return URLs only
+          images: item.images, // ✅ return URLs only
           seller: seller
             ? { userId: item.ownerId, firstName: seller.firstName, lastName: seller.lastName }
             : null,
@@ -682,7 +689,7 @@ app.get("/api/cart", requireLogin, async (req, res) => {
           name: product.name,
           description: product.description,
           price: product.price,
-          images: product.images.map(img => img.url), // ✅ only URLs
+          images: product.images, // ✅ only URLs
           quantity: cartItem.quantity,
           seller: seller
             ? {
@@ -788,7 +795,7 @@ app.get("/api/cart/get", requireLogin, async (req, res) => {
           name: product.name,
           price: product.price,
           quantity: cartItem.quantity,
-          images: product.images.map(img => img.url), // ✅ URLs only
+          images: product.images, // ✅ URLs only
           seller: {
             userId: product.ownerId,
             droppedPin: product.droppedPin || null,
