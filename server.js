@@ -452,27 +452,31 @@ app.post("/verification/reject/:userId", async (req, res) => {
   }
 });
 
+// -------------------- Helper: Safe Profile Icon --------------------
+function safeProfileIcon(icon) {
+  return icon && icon.trim() !== ""
+    ? icon
+    : "/default-avatar.png"; // ✅ served from public/
+}
+
 //=============Users' Profiles===============
 app.get("/api/me", async (req, res) => {
   try {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
 
-    const user = await User.findOne(
-      { userId: req.session.userId },
-      "userId email profileIcon"
-    );
+    const user = await User.findOne({ userId: req.session.userId });
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const verification = await Verification.findOne({ userId: user.userId });
-
-    // ✅ Always return a safe profileIcon
-    const profileIcon = user.profileIcon || "https://via.placeholder.com/150?text=No+Photo";
+    if (!verification || !verification.droppedPin) {
+      return res.status(404).json({ error: "No buyer droppedPin found" });
+    }
 
     res.json({
       userId: user.userId,
       email: user.email,
-      profileIcon, // <-- always safe now
-      droppedPin: verification?.droppedPin || null,
+      droppedPin: verification.droppedPin,
+      profileIcon: safeProfileIcon(user.profileIcon),
     });
   } catch (err) {
     console.error("Error in /api/me:", err);
@@ -494,12 +498,9 @@ app.get("/api/profile", requireLogin, async (req, res) => {
       "address"
     );
 
-    // ✅ Always return a safe URL (user photo OR placeholder)
-    const profileIcon = user.profileIcon || "https://via.placeholder.com/150?text=No+Photo";
-
     res.json({
       ...user.toObject(),
-      profileIcon,
+      profileIcon: safeProfileIcon(user.profileIcon), // ✅ fallback
       address: verification ? verification.address : null,
     });
   } catch (err) {
@@ -508,29 +509,22 @@ app.get("/api/profile", requireLogin, async (req, res) => {
   }
 });
 
-// -------------------- Unified Cloudinary helper --------------------
-async function uploadToCloudinary(file, folder = "profile") {
-  if (!file) return null;
-  const b64 = file.buffer.toString("base64");
-  const dataURI = `data:${file.mimetype};base64,${b64}`;
-  const result = await cloudinary.uploader.upload(dataURI, { folder });
-  return result.secure_url;
-}
-
 // ✅ Profile photo → Cloudinary
 app.post("/api/profile-photo", requireLogin, uploadMemory.single("profilePhoto"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    // Use the unified helper
-    const url = await uploadToCloudinary(req.file, "profile");
+    // Upload to Cloudinary
+    const b64 = req.file.buffer.toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    const result = await cloudinary.uploader.upload(dataURI, { folder: "profile" });
 
     await User.updateOne(
       { userId: req.session.userId },
-      { $set: { profileIcon: url } }
+      { $set: { profileIcon: result.secure_url } }
     );
 
-    res.json({ message: "✅ Profile photo updated", url });
+    res.json({ message: "✅ Profile photo updated", url: result.secure_url });
   } catch (err) {
     console.error("Profile upload error:", err);
     res.status(500).json({ error: "Failed to upload profile photo" });
@@ -540,8 +534,9 @@ app.post("/api/profile-photo", requireLogin, uploadMemory.single("profilePhoto")
 app.get("/api/profile-photo/:userId", async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.params.userId });
-    if (!user || !user.profileIcon) return res.status(404).send("No photo");
-    res.json({ url: user.profileIcon });
+    if (!user) return res.status(404).send("User not found");
+
+    res.json({ url: safeProfileIcon(user.profileIcon) }); // ✅ fallback
   } catch (err) {
     console.error("Profile fetch error:", err);
     res.status(500).send("Failed to fetch photo");
@@ -550,7 +545,10 @@ app.get("/api/profile-photo/:userId", async (req, res) => {
 
 app.delete("/api/profile-photo", requireLogin, async (req, res) => {
   try {
-    await User.updateOne({ userId: req.session.userId }, { $set: { profileIcon: null } });
+    await User.updateOne(
+      { userId: req.session.userId },
+      { $set: { profileIcon: "" } } // ✅ fallback will cover this
+    );
     res.json({ message: "✅ Profile photo deleted" });
   } catch (err) {
     console.error("Profile delete error:", err);
@@ -572,12 +570,9 @@ app.get("/api/users/:userId", async (req, res) => {
       "address"
     );
 
-    // ✅ Same safe fallback
-    const profileIcon = user.profileIcon || "https://via.placeholder.com/150?text=No+Photo";
-
     res.json({
       ...user.toObject(),
-      profileIcon,
+      profileIcon: safeProfileIcon(user.profileIcon), // ✅ fallback
       address: verification ? verification.address : null,
     });
   } catch (err) {
