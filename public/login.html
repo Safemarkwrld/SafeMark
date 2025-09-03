@@ -7,29 +7,36 @@
     <link rel="stylesheet" href="login.css">
   </head>
   <body>
-    <div class="outerCont">
-      <h1>SafeMark</h1>
-      <h3>Welcome</h3>
-      <h4>Sign in</h4>
+    <div class="login-container">
+      <div class="head-container">
+        <h1>SafeMark</h1>
+        <h3>Welcome</h3>
+        <h4>Sign in</h4>
+      </div>
       <div class="detailsCont">
         <form method="post" action="/login">
           <div class="input-box">
-            <img src="mail-64.webp" id="icon">
-            <input type="email" name="email" autocomplete="off" required>
-            <label>Email address</label>
+            <label>Email address*</label>
+            <div class="detail-container">
+              <input type="email" name="email" autocomplete="off" required>
+              <img src="960846.png" id="icon">
+            </div>
           </div>
           <div class="input-box">
-            <img src="icon-locked-64.webp" id="icon">
-            <input type="password" name="password" autocomplete="off" required>
-            <label>Password</label>
+            <label>Password*</label>
+            <div class="detail-container">
+              <input type="password" name="password" autocomplete="off" required>
+              <img src="1086392.png" id="icon">
+            </div>
           </div>
           <p id="error-message"></p>
+          
+          <button type="submit" class="signinBtn">Log in<img src="2355273.png" id="btn-icon"></button>
           <div class="remember-forgot">
             <a href="#">Forgot password?</a>
           </div>
-          <button type="submit" class="signinBtn">Sign-In</button>
           <div class="register">
-            <p>Don't have an account?<a href="signup.html">Sign-up</a></p>
+            <p>Don't have an account?</p><a href="signup.html">Sign up</a>
           </div>
         </form>
       </div>

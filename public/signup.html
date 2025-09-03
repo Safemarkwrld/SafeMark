@@ -7,47 +7,53 @@
     <link rel="stylesheet" href="signup.css">
   </head>
   <body>
-    <div class="outerCont">
-      <h1>SafeMark</h1>
-      <h3>Welcome</h3>
-      <h4>Register now</h4>
+    <div class="signup-container">
+      <div class="head-cont">
+        <h1>SafeMark</h1>
+        <h3>Welcome</h3>
+        <h4>Register now</h4>
+      </div>
       <div class="detailsCont">
-        <!-- add id here -->
         <form action="/signup" method="post" enctype="application/x-www-form-urlencoded">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
           <div class="input-box">
-            <img src="mail-64.webp" id="icon">
-            <input type="email" name="email" required>
-            <label>Email address</label>
+            <label>Email address*</label>
+            <div class="detail-input">
+              <input type="email" name="email" required>
+              <img src="960846.png" id="icon">
+            </div>
           </div>
-
           <div class="input-box">
-            <img src="icons_user2-64.webp" id="icon">
-            <input type="text" name="firstName" required>
-            <label>First name</label>
+            <label>First name*</label>
+            <div class="detail-input">
+              <input type="text" name="firstName" required>
+              <img src="2263539.png" id="icon">
+            </div>
           </div>
-
           <div class="input-box">
-            <img src="icons_user2-64.webp" id="icon">
-            <input type="text" name="lastName" required>
-            <label>Last name</label>
+            <label>Last name*</label>
+            <div class="detail-input">
+              <input type="text" name="lastName" required>
+              <img src="2263539.png" id="icon">
+            </div>
           </div>
-
           <div class="input-box">
-            <img src="icon-locked-64.webp" id="icon">
-            <input type="password" name="password" required>
-            <label>Password</label>
+            <label>Password*</label>
+            <div class="detail-input">
+              <input type="password" name="password" required>
+              <img src="1086392.png" id="icon">
+            </div>
           </div>
-
           <div class="input-box">
-            <img src="icon-locked-64.webp" id="icon">
-            <input type="password" name="confirmpassword" required>
-            <label>Confirm password</label>
+            <label>Confirm Password*</label>
+            <div class="detail-input">
+              <input type="password" name="confirmpassword" required>
+              <img src="1086392.png" id="icon">
+            </div>
           </div>
-
-          <button type="submit" class="signupBtn">Sign-Up</button>
+          <button type="submit" class="signupBtn">Sign up <img src="2355273.png" id="btn-icon"></button>
 
           <div class="signin">
-            <p>Already have an account? <a href="login.html">Sign-in</a></p>
+            <p>Already have an account? <a href="login.html">Log in</a></p>
           </div>
         </form>
       </div>

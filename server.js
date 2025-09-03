@@ -452,7 +452,7 @@ app.post("/verification/reject/:userId", async (req, res) => {
   }
 });
 
-//=============PROFILE CHECKINSS===============
+//=============PROFILE CHECKINS===============
 app.get("/api/me", async (req, res) => {
   try {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
@@ -500,21 +500,29 @@ app.get("/api/profile", requireLogin, async (req, res) => {
   }
 });
 
+// -------------------- Unified Cloudinary helper --------------------
+async function uploadToCloudinary(file, folder = "profile") {
+  if (!file) return null;
+  const b64 = file.buffer.toString("base64");
+  const dataURI = `data:${file.mimetype};base64,${b64}`;
+  const result = await cloudinary.uploader.upload(dataURI, { folder });
+  return result.secure_url;
+}
+
 // ✅ Profile photo → Cloudinary
 app.post("/api/profile-photo", requireLogin, uploadMemory.single("profilePhoto"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const b64 = req.file.buffer.toString("base64");
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-    const result = await cloudinary.uploader.upload(dataURI, { folder: "profile" });
+    // Use the unified helper
+    const url = await uploadToCloudinary(req.file, "profile");
 
     await User.updateOne(
       { userId: req.session.userId },
-      { $set: { profileIcon: result.secure_url } }
+      { $set: { profileIcon: url } }
     );
 
-    res.json({ message: "✅ Profile photo updated", url: result.secure_url });
+    res.json({ message: "✅ Profile photo updated", url });
   } catch (err) {
     console.error("Profile upload error:", err);
     res.status(500).json({ error: "Failed to upload profile photo" });
@@ -571,26 +579,24 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
   try {
     const productCode = await getNextProductCode();
 
-    // ✅ Upload item images to Cloudinary (store url + public_id)
-    const uploadToCloudinaryItem = async file => {
-  const b64 = file.buffer.toString("base64");
-  const dataURI = `data:${file.mimetype};base64,${b64}`;
-  const result = await cloudinary.uploader.upload(dataURI, { folder: "items" });
-  return result.secure_url; // only URL
-};
+    // Fetch seller verification for droppedPin
+    const verification = await Verification.findOne({ userId: req.session.userId });
 
-const images = await Promise.all((req.files || []).map(file => uploadToCloudinaryItem(file)));
+    // ✅ Upload item images to Cloudinary using unified helper
+    const images = await Promise.all(
+      (req.files || []).map(file => uploadToCloudinary(file, "items"))
+    );
 
-const newItem = new Item({
-  productCode,
-  ownerId: req.session.userId,
-  name: req.body.name,
-  description: req.body.description,
-  price: Number(req.body.price),
-  quantity: Number(req.body.quantity),
-  images, // ✅ now only URLs
-  droppedPin: verification.droppedPin,
-});
+    const newItem = new Item({
+      productCode,
+      ownerId: req.session.userId,
+      name: req.body.name,
+      description: req.body.description,
+      price: Number(req.body.price),
+      quantity: Number(req.body.quantity),
+      images, // ✅ now only URLs
+      droppedPin: verification?.droppedPin || null,
+    });
 
     await newItem.save();
     res.redirect("/marketplace.html");
@@ -603,7 +609,6 @@ const newItem = new Item({
 app.get("/items/mine", requireLogin, async (req, res) => {
   try {
     const items = await Item.find({ ownerId: req.session.userId });
-    // Return only URLs for client
     const sanitized = items.map(i => ({
       ...i.toObject(),
       images: i.images
@@ -620,7 +625,7 @@ app.delete("/items/:id", requireLogin, async (req, res) => {
     const item = await Item.findOne({ _id: req.params.id, ownerId: req.session.userId });
     if (!item) return res.status(404).send("Item not found or not authorized");
 
-    // ✅ Remove images from Cloudinary
+    // ✅ Remove images from Cloudinary if stored with public_id
     if (item.images && item.images.length > 0) {
       for (const img of item.images) {
         if (img.public_id) {
@@ -653,7 +658,7 @@ app.get("/items/search", requireLogin, async (req, res) => {
         const seller = await User.findOne({ userId: item.ownerId }, "firstName lastName");
         return {
           ...item.toObject(),
-          images: item.images, // ✅ return URLs only
+          images: item.images,
           seller: seller
             ? { userId: item.ownerId, firstName: seller.firstName, lastName: seller.lastName }
             : null,
@@ -689,20 +694,21 @@ app.get("/api/cart", requireLogin, async (req, res) => {
           name: product.name,
           description: product.description,
           price: product.price,
-          images: product.images, // ✅ only URLs
+          images: product.images,
           quantity: cartItem.quantity,
           seller: seller
             ? {
                 userId: seller.userId,
                 firstName: seller.firstName,
                 lastName: seller.lastName,
-                profileIcon: seller.profileIcon, // ✅ Cloudinary URL
+                profileIcon: seller.profileIcon,
               }
             : null,
           droppedPin: product.droppedPin || null,
         };
       })
     );
+
     res.json(detailedItems.filter(Boolean));
   } catch (err) {
     console.error("Get cart error:", err);
@@ -710,7 +716,7 @@ app.get("/api/cart", requireLogin, async (req, res) => {
   }
 });
 
-//ADD TO CART
+// ADD TO CART
 app.post("/api/cart/add", requireLogin, async (req, res) => {
   try {
     const { productCode, quantity = 1 } = req.body;
@@ -720,7 +726,7 @@ app.post("/api/cart/add", requireLogin, async (req, res) => {
       cart = new Cart({ userId: req.session.userId, items: [] });
     }
 
-    const existing = cart.items.find((i) => i.productCode === productCode);
+    const existing = cart.items.find(i => i.productCode === productCode);
     if (existing) {
       existing.quantity += Number(quantity);
     } else {
@@ -735,18 +741,16 @@ app.post("/api/cart/add", requireLogin, async (req, res) => {
   }
 });
 
-// Remove item from cart
+// REMOVE FROM CART
 app.post("/api/cart/remove", requireLogin, async (req, res) => {
   try {
     const { productCode } = req.body;
-    if (!productCode) {
-      return res.status(400).json({ error: "productCode is required" });
-    }
+    if (!productCode) return res.status(400).json({ error: "productCode is required" });
 
     const cart = await Cart.findOne({ userId: req.session.userId });
     if (!cart) return res.json({ message: "Cart is already empty" });
 
-    cart.items = cart.items.filter((i) => i.productCode !== productCode);
+    cart.items = cart.items.filter(i => i.productCode !== productCode);
     await cart.save();
 
     res.json({ message: "✅ Item removed from cart" });
@@ -756,7 +760,7 @@ app.post("/api/cart/remove", requireLogin, async (req, res) => {
   }
 });
 
-// Clear cart
+// CLEAR CART
 app.post("/api/cart/clear", requireLogin, async (req, res) => {
   try {
     await Cart.findOneAndUpdate(
@@ -771,22 +775,17 @@ app.post("/api/cart/clear", requireLogin, async (req, res) => {
   }
 });
 
-// -------------------- CART ROUTES --------------------
-// Get all cart items for logged-in user
+// GET CART ITEMS
 app.get("/api/cart/get", requireLogin, async (req, res) => {
   try {
     const userId = req.session.userId;
-    if (!userId) {
-      return res.status(401).json({ error: "Not logged in" });
-    }
+    if (!userId) return res.status(401).json({ error: "Not logged in" });
 
     const cart = await Cart.findOne({ userId });
-    if (!cart || cart.items.length === 0) {
-      return res.json([]);
-    }
+    if (!cart || cart.items.length === 0) return res.json([]);
 
     const detailedItems = await Promise.all(
-      cart.items.map(async (cartItem) => {
+      cart.items.map(async cartItem => {
         const product = await Item.findOne({ productCode: cartItem.productCode });
         if (!product) return null;
 
@@ -795,7 +794,7 @@ app.get("/api/cart/get", requireLogin, async (req, res) => {
           name: product.name,
           price: product.price,
           quantity: cartItem.quantity,
-          images: product.images, // ✅ URLs only
+          images: product.images,
           seller: {
             userId: product.ownerId,
             droppedPin: product.droppedPin || null,
@@ -811,19 +810,15 @@ app.get("/api/cart/get", requireLogin, async (req, res) => {
   }
 });
 
-
 // -------------------- Seller Verification --------------------
 const router = express.Router();
 
-// GET seller verification (address) by userId
 router.get("/api/users/:userId/verification", async (req, res) => {
   try {
     const { userId } = req.params;
-
     if (!userId) return res.status(400).json({ error: "Missing userId" });
 
     const verification = await Verification.findOne({ userId }).lean();
-
     if (!verification) return res.status(404).json({ error: "Verification not found" });
 
     res.json({
@@ -835,7 +830,7 @@ router.get("/api/users/:userId/verification", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-//==++==++==++==++==++==++==++=SAVE CART INFO TO PROCEED TO CHECKOUT==++==++==++==++==++==++==++==
+
 // -------------------- Checkout Routes --------------------
 const checkoutRouter = express.Router();
 
@@ -879,7 +874,6 @@ checkoutRouter.get("/get", requireLogin, async (req, res) => {
     // enrich sellers + items
     const sellers = await Promise.all(
       (checkoutDoc.sellers || []).map(async (s) => {
-        // ensure sellerDroppedPin (fallback via any item owned by seller)
         let sellerDroppedPin = s.sellerDroppedPin || null;
         if (!sellerDroppedPin) {
           const anyItem = await Item.findOne({ ownerId: s.sellerId }, "droppedPin").lean();
@@ -888,21 +882,14 @@ checkoutRouter.get("/get", requireLogin, async (req, res) => {
 
         const items = await Promise.all(
           (s.items || []).map(async (it) => {
-            const prod = await Item.findOne(
-              { productCode: it.productCode },
-              "images price name"
-            ).lean();
-
+            const prod = await Item.findOne({ productCode: it.productCode }, "images price name").lean();
             return {
-              // keep original fields
               productCode: it.productCode,
               name: it.name ?? prod?.name ?? "",
               quantity: it.quantity,
               updatedPrice:
-                typeof it.updatedPrice === "number"
-                  ? it.updatedPrice
-                  : (typeof prod?.price === "number" ? prod.price : 0),
-              image: prod?.images?.[0] || null, // ✅ Cloudinary URL (first image)
+                typeof it.updatedPrice === "number" ? it.updatedPrice : (typeof prod?.price === "number" ? prod.price : 0),
+              image: prod?.images?.[0] || null,
             };
           })
         );
@@ -953,90 +940,76 @@ checkoutRouter.post("/finalize", requireLogin, async (req, res) => {
   }
 });
 
-
 // -------------------- Payment Proof Upload --------------------
-app.post(
-  "/api/payments/upload-proof",
-  requireLogin,
-  uploadMemory.single("proof"),
-  async (req, res) => {
-    try {
-      const userId = req.session.userId;
-      const { amount, method } = req.body;
+const uploadProofToCloudinary = (fileBuffer) =>
+  new Promise((resolve, reject) => {
+    const streamifier = require("streamifier");
+    const stream = cloudinary.uploader.upload_stream({ folder: "payment_proofs" }, (err, result) => {
+      if (err) return reject(err);
+      resolve(result.secure_url);
+    });
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
 
-      // Fetch active checkout
-      const checkout = await Checkout.findOne({ userId });
-      if (!checkout) return res.status(400).json({ error: "No active checkout found" });
+app.post("/api/payments/upload-proof", requireLogin, uploadMemory.single("proof"), async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { amount, method } = req.body;
 
-      let proofUrl = null;
+    const checkout = await Checkout.findOne({ userId });
+    if (!checkout) return res.status(400).json({ error: "No active checkout found" });
 
-      if (req.file) {
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload_stream(
-          { folder: "payment_proofs" },
-          (error, result) => {
-            if (error) throw error;
-            proofUrl = result.secure_url;
-          }
-        );
-
-        // Write the buffer into the stream
-        const streamifier = require("streamifier");
-        streamifier.createReadStream(req.file.buffer).pipe(result);
-      }
-
-      // Save payment record
-      const payment = new Payment({
-        userId,
-        method,
-        originalTotal: Number(amount),
-        discount: Number(amount) * 0.15, // your front-end discount logic
-        finalAmount: Number(amount) * 0.85,
-        proofPath: proofUrl,
-        checkoutSnapshot: checkout.toObject(),
-        status: "pending",
-      });
-      await payment.save();
-
-      // Save order record
-      const order = new Order({
-        buyerId: userId,
-        paymentId: payment._id,
-        checkoutSnapshot: checkout.toObject(),
-        sellers: checkout.sellers.map((s) => ({
-          sellerId: s.sellerId,
-          sellerDroppedPin: s.sellerDroppedPin,
-          items: s.items.map((it) => ({
-            productCode: it.productCode,
-            name: it.name,
-            quantity: it.quantity,
-            price: it.updatedPrice || it.price,
-            image: it.image || "",
-          })),
-        })),
-        totalAmount: Number(amount),
-        orderStatus: false,
-      });
-      await order.save();
-
-      // Clear checkout
-      await Checkout.deleteOne({ userId });
-
-      return res.json({ success: true, message: "Payment proof uploaded. Order pending approval." });
-    } catch (err) {
-      console.error("Payment proof error:", err);
-      return res.status(500).json({ error: "Server error uploading payment proof" });
+    let proofUrl = null;
+    if (req.file) {
+      proofUrl = await uploadProofToCloudinary(req.file.buffer);
     }
+
+    const payment = new Payment({
+      userId,
+      method,
+      originalTotal: Number(amount),
+      discount: Number(amount) * 0.15,
+      finalAmount: Number(amount) * 0.85,
+      proofPath: proofUrl,
+      checkoutSnapshot: checkout.toObject(),
+      status: "pending",
+    });
+    await payment.save();
+
+    const order = new Order({
+      buyerId: userId,
+      paymentId: payment._id,
+      checkoutSnapshot: checkout.toObject(),
+      sellers: checkout.sellers.map((s) => ({
+        sellerId: s.sellerId,
+        sellerDroppedPin: s.sellerDroppedPin,
+        items: s.items.map((it) => ({
+          productCode: it.productCode,
+          name: it.name,
+          quantity: it.quantity,
+          price: it.updatedPrice || it.price,
+          image: it.image || "",
+        })),
+      })),
+      totalAmount: Number(amount),
+      orderStatus: false,
+    });
+    await order.save();
+
+    await Checkout.deleteOne({ userId });
+
+    return res.json({ success: true, message: "Payment proof uploaded. Order pending approval." });
+  } catch (err) {
+    console.error("Payment proof error:", err);
+    return res.status(500).json({ error: "Server error uploading payment proof" });
   }
-);
+});
 
 // -------------------- Get My Orders --------------------
 app.get("/api/orders/my", requireLogin, async (req, res) => {
   try {
     const userId = req.session.userId;
-    const order = await Order.findOne({ buyerId: userId })
-      .sort({ createdAt: -1 })
-      .populate("paymentId");
+    const order = await Order.findOne({ buyerId: userId }).sort({ createdAt: -1 }).populate("paymentId");
 
     if (!order) return res.json({ success: false, order: null });
 
@@ -1068,24 +1041,17 @@ async function startServer(app) {
     const MONGO_URI = process.env.MONGODB_URI;
     const PORT = process.env.PORT || 3000;
 
-    if (!MONGO_URI) {
-      throw new Error("❌ MONGODB_URI is not defined in .env file");
-    }
+    if (!MONGO_URI) throw new Error("❌ MONGODB_URI is not defined in .env file");
 
-    // Connect to MongoDB Atlas
-    await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log(`✅ MongoDB Connected`);
 
-    // Start server
     app.listen(PORT, () => {
       console.log(`✅ Server running at http://localhost:${PORT}`);
     });
   } catch (err) {
     console.error("❌ Failed to start server:", err.message);
-    process.exit(1); // Exit if cannot connect
+    process.exit(1);
   }
 }
 
