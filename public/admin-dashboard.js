@@ -11,7 +11,7 @@ async function loadPendingUsers() {
     users.forEach(user => {
       const clone = template.content.cloneNode(true);
 
-      clone.querySelector(".username").textContent = user.fullname || "No Name";
+      clone.querySelector(".username").textContent = user.fullName || "No Name";
       clone.querySelector(".userEmail").textContent = user.email;
 
       if (user.idFront) clone.querySelector(".idFront").src = user.idFront;

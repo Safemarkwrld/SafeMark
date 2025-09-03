@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 require("dotenv").config();
 
 const cloudinary = require("cloudinary").v2;
@@ -70,7 +69,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: String,
   verified: { type: Boolean, default: false },
   pending: { type: Boolean, default: false },
-  profileIcon: { type: Boolean, default: false },
+  profileIcon: { type: String, default: "" }, // ✅ store Cloudinary URL, not boolean
   role: { type: String, default: "user" },
   createdAt: { type: Date, default: Date.now },
 });
@@ -78,7 +77,7 @@ const User = mongoose.model("User", userSchema);
 
 const verificationSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
-  fullname: String,
+  fullName: String, // ✅ fixed name (was fullname earlier)
   dob: String,
   address: String,
   email: String,
@@ -102,13 +101,12 @@ const itemSchema = new mongoose.Schema({
   price: Number,
   quantity: Number,
   createdAt: { type: Date, default: Date.now },
-  images: [String],
-  droppedPin: {  
+  images: [String], // ✅ Cloudinary URLs
+  droppedPin: {
     lat: Number,
     lon: Number,
   },
 });
-
 const Item = mongoose.model("Item", itemSchema);
 
 const cartItemSchema = new mongoose.Schema({
@@ -140,38 +138,36 @@ const checkoutSchema = new mongoose.Schema({
   ],
   createdAt: { type: Date, default: Date.now },
 });
-
 const Checkout = mongoose.model("Checkout", checkoutSchema);
+
 // -------------------- Payments Schema --------------------
 const paymentSchema = new mongoose.Schema({
-  userId: { type: String, required: true },       // buyer (your string ID, e.g., sm25mf3001)
+  userId: { type: String, required: true }, // buyer (string ID, e.g., sm25mf3001)
   method: { type: String, enum: ["Binance Pay", "Card"], required: true },
 
-  // client-side numbers (we'll also recompute later if you want to tighten rules)
-  originalTotal: { type: Number, required: true }, // total before discount
+  // client-side numbers (we'll also recompute later if you want tighter rules)
+  originalTotal: { type: Number, required: true },
   discount: { type: Number, default: 0 },
-  finalAmount: { type: Number, required: true },   // after discount
+  finalAmount: { type: Number, required: true },
 
-  // file path (Cloudinary URL)
+  // ✅ file path (Cloudinary URL)
   proofPath: { type: String, required: true },
 
   // workflow
   status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   adminNote: { type: String, default: "" },
   reviewedAt: { type: Date, default: null },
-  reviewerId: { type: String, default: null },     // admin's userId
+  reviewerId: { type: String, default: null }, // admin's userId
 
   // traceability
-  checkoutSnapshot: {},                             
+  checkoutSnapshot: {},
 });
-
 const Payment = mongoose.model("Payment", paymentSchema);
-
 
 const orderSchema = new mongoose.Schema({
   buyerId: { type: String, required: true },
   checkoutSnapshot: {}, // copy of checkout at payment
-  paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment', required: true },
+  paymentId: { type: mongoose.Schema.Types.ObjectId, ref: "Payment", required: true },
   sellers: [
     {
       sellerId: String,
@@ -192,7 +188,7 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
-const Order = mongoose.model('Order', orderSchema);
+const Order = mongoose.model("Order", orderSchema);
 
 // -------------------- Utilities --------------------
 async function getNextUserId() {
@@ -230,18 +226,10 @@ function requireAdmin(req, res, next) {
 // -------------------- File Uploads (Cloudinary + memory) --------------------
 const uploadMemory = multer({ storage: multer.memoryStorage() });
 
-// Reusable multer handlers that use memory storage only (we upload the buffers to Cloudinary inside routes)
-const uploadItem = uploadMemory.array("images", 5); // items images
-const uploadProfile = uploadMemory.single("profilePhoto"); // profile photo
-const uploadPaymentProof = uploadMemory.single("proof"); // payment proof
-const uploadVerification = uploadMemory.fields([
-  { name: "idFront", maxCount: 1 },
-  { name: "idBack", maxCount: 1 },
-  { name: "selfie", maxCount: 1 },
-]);
-
-// Keep static /uploads route for backward compatibility (optional)
-app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
+// -------------------- Health Check --------------------
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: "ok", uptime: process.uptime() });
+});
 
 // -------------------- Routes --------------------
 // Public pages
@@ -320,13 +308,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-//======================VERIFICATION ROUTES======================
-// Ensure uploads directory exists (kept for compatibility — not used for new uploads)
-const uploadDir = path.join(__dirname, "public", "uploads", "verification");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 // File filter helper (used only for client-side validation if needed)
 function fileFilter(req, file, cb) {
   const allowed = /jpeg|jpg|png|pdf/;
@@ -338,7 +319,6 @@ function fileFilter(req, file, cb) {
   }
 }
 
-
 // -------------------- Verification Submit --------------------
 app.post(
   "/verification/submit",
@@ -349,9 +329,9 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      const { fullname, dob, address, email, phone, latitude, longitude } = req.body;
+      const { fullName, dob, address, email, phone, latitude, longitude } = req.body;
 
-      if (!fullname || !dob || !address || !email || !phone || !latitude || !longitude) {
+      if (!fullName || !dob || !address || !email || !phone || !latitude || !longitude) {
         return res.status(400).json({ error: "Missing required fields." });
       }
 
@@ -385,7 +365,7 @@ app.post(
         { userId },
         {
           userId,
-          fullname,
+          fullName,
           dob,
           address,
           email,
@@ -413,7 +393,7 @@ app.post(
 // -------------------- Admin Get Pending Verifications --------------------
 app.get("/verification/pending", async (req, res) => {
   try {
-    const pendingUsers = await Verification.find({}).populate("userId");
+    const pendingUsers = await Verification.find({}); // ✅ removed populate
 
     const users = await User.find({ pending: true });
 
@@ -421,7 +401,7 @@ app.get("/verification/pending", async (req, res) => {
       const v = pendingUsers.find(v => v.userId.toString() === u.userId.toString());
       return {
         userId: u.userId,
-        fullName: v?.fullName,
+        fullName: v?.fullName, // ✅ fixed field name
         email: u.email,
         idFront: v?.idFront,
         idBack: v?.idBack,
@@ -579,15 +559,15 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
   try {
     const productCode = await getNextProductCode();
 
-    // ✅ Upload item images to Cloudinary
-    const uploadToCloudinary = async file => {
+    // ✅ Upload item images to Cloudinary (store url + public_id)
+    uploadToCloudinary = async file => {
       const b64 = file.buffer.toString("base64");
       const dataURI = `data:${file.mimetype};base64,${b64}`;
       const result = await cloudinary.uploader.upload(dataURI, { folder: "items" });
-      return result.secure_url;
+      return { url: result.secure_url, public_id: result.public_id };
     };
 
-    const imageUrls = await Promise.all((req.files || []).map(file => uploadToCloudinary(file)));
+    const images = await Promise.all((req.files || []).map(file => uploadToCloudinary(file)));
 
     const verification = await Verification.findOne({ userId: req.session.userId });
     if (!verification || !verification.droppedPin) {
@@ -601,7 +581,7 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
       description: req.body.description,
       price: Number(req.body.price),
       quantity: Number(req.body.quantity),
-      images: imageUrls,
+      images, // ✅ Cloudinary objects stored
       droppedPin: verification.droppedPin,
     });
 
@@ -616,7 +596,12 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
 app.get("/items/mine", requireLogin, async (req, res) => {
   try {
     const items = await Item.find({ ownerId: req.session.userId });
-    res.json(items);
+    // Return only URLs for client
+    const sanitized = items.map(i => ({
+      ...i.toObject(),
+      images: i.images.map(img => img.url),
+    }));
+    res.json(sanitized);
   } catch (err) {
     console.error("Get items error:", err);
     res.status(500).json({ error: "Failed to fetch seller items" });
@@ -628,7 +613,19 @@ app.delete("/items/:id", requireLogin, async (req, res) => {
     const item = await Item.findOne({ _id: req.params.id, ownerId: req.session.userId });
     if (!item) return res.status(404).send("Item not found or not authorized");
 
-    // ✅ Optionally: remove from Cloudinary if needed (requires storing public_id)
+    // ✅ Remove images from Cloudinary
+    if (item.images && item.images.length > 0) {
+      for (const img of item.images) {
+        if (img.public_id) {
+          try {
+            await cloudinary.uploader.destroy(img.public_id);
+          } catch (err) {
+            console.error("Cloudinary delete failed:", err);
+          }
+        }
+      }
+    }
+
     await item.deleteOne();
     res.send("✅ Item deleted");
   } catch (err) {
@@ -649,6 +646,7 @@ app.get("/items/search", requireLogin, async (req, res) => {
         const seller = await User.findOne({ userId: item.ownerId }, "firstName lastName");
         return {
           ...item.toObject(),
+          images: item.images.map(img => img.url), // ✅ return URLs only
           seller: seller
             ? { userId: item.ownerId, firstName: seller.firstName, lastName: seller.lastName }
             : null,
@@ -684,17 +682,17 @@ app.get("/api/cart", requireLogin, async (req, res) => {
           name: product.name,
           description: product.description,
           price: product.price,
-          images: product.images, // ✅ Cloudinary URLs stored in DB
+          images: product.images.map(img => img.url), // ✅ only URLs
           quantity: cartItem.quantity,
           seller: seller
             ? {
                 userId: seller.userId,
                 firstName: seller.firstName,
                 lastName: seller.lastName,
-                profileIcon: seller.profileIcon, // ✅ should also be Cloudinary URL
+                profileIcon: seller.profileIcon, // ✅ Cloudinary URL
               }
             : null,
-          droppedPin: product.droppedPin || null,  // ✅ Include seller location
+          droppedPin: product.droppedPin || null,
         };
       })
     );
@@ -788,8 +786,9 @@ app.get("/api/cart/get", requireLogin, async (req, res) => {
         return {
           productCode: product.productCode,
           name: product.name,
-          price: product.price, // frontend can update via radios
+          price: product.price,
           quantity: cartItem.quantity,
+          images: product.images.map(img => img.url), // ✅ URLs only
           seller: {
             userId: product.ownerId,
             droppedPin: product.droppedPin || null,
@@ -829,7 +828,6 @@ router.get("/api/users/:userId/verification", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 //==++==++==++==++==++==++==++=SAVE CART INFO TO PROCEED TO CHECKOUT==++==++==++==++==++==++==++==
 // -------------------- Checkout Routes --------------------
 const checkoutRouter = express.Router();

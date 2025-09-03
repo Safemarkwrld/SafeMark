@@ -53,9 +53,9 @@ body {
     margin-top: 7px;
     display: flex;
     flex-direction: column;
-    padding: 7px;
+    padding: 8px 16px;
     border: none;
-    border-radius: 999px;
+    border-radius: 8px;
     align-items: center;
     justify-content: center;
     background-color: #0078d4;

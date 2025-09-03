@@ -11,12 +11,12 @@ function showStep(index) {
 
 // ---------------- Step 1 -> Step 2 ----------------
 document.getElementById("next1").addEventListener("click", () => {
-  const fullname = document.getElementById("fullname").value.trim();
+  const fullName = document.getElementById("fullName").value.trim();
   const dob = document.getElementById("dob").value.trim();
   const email = document.getElementById("email").value.trim();
   const phone = document.getElementById("phone").value.trim();
 
-  if (!fullname || !dob || !email || !phone) {
+  if (!fullName || !dob || !email || !phone) {
     alert("Please fill in all fields.");
     return;
   }
@@ -103,7 +103,7 @@ function submitVerification() {
   const formData = new FormData();
 
   // Step 1
-  formData.append("fullname", document.getElementById("fullname").value.trim());
+  formData.append("fullName", document.getElementById("fullName").value.trim());
   formData.append("dob", document.getElementById("dob").value.trim());
   formData.append("email", document.getElementById("email").value.trim());
   formData.append("phone", document.getElementById("phone").value.trim());
