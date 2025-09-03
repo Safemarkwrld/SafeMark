@@ -610,12 +610,12 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
         <div class="exp-csc">
           <div class="expiration">
             <p>expiration Date:</p>
-            <input type="text" placeholder="mm / yyyy">
+            <input type="text"  name="cc-exp" placeholder="mm / yyyy">
           </div>
           <div class="csc">
             <div class="card-security">
               <p>Card Security Code:</p>
-              <input type="text" placeholder="0000">
+              <input type="text" name=cvv"" placeholder="0000">
             </div>
             <div class="card-icon">
               <img src="3503359.png" alt="card icon" id="card-icon">

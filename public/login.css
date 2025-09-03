@@ -14,19 +14,18 @@ body{
   color: #444;
   font-size: 12px;
   font-family: Poppins, Arial, Helvetica, sans-serif;
-  padding: 5px;
+  padding: 20px;
 }
 .login-container{
   display: flex;
   flex-direction: column;
   width: 100%;
-  border: #444 2px solid;
-  padding-top: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 50px;
+  padding-top: 50px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 80px;
   border-radius: 10px;
-  box-shadow: rgb(0,0,0, 0.25) 0 0 20px;
+  box-shadow: rgb(0,0,0, 0.3) 0 0 30px;
 }
 .head-container{
   display: flex;
@@ -41,6 +40,7 @@ body{
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-top: 20px;
 }
 .input-box{
   display: flex;
@@ -58,9 +58,10 @@ body{
   height: 30px;
   position: relative;
   width: 100%;
-  border: #444 2px solid;
+  background-color: rgba(240, 240, 240, 0.5);
+  border: 1px solid rgba(219, 219, 219, 0.8);
+  box-shadow: rgba(190, 190, 190, 0.3) 0 0 8px;
   border-radius: 4px;
-  background-color: rgba(230, 230, 230, 0.25);
 }
 .detail-container input{
   background-color: transparent;

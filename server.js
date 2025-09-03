@@ -452,23 +452,27 @@ app.post("/verification/reject/:userId", async (req, res) => {
   }
 });
 
-//=============PROFILE CHECKINS===============
+//=============Users' Profiles===============
 app.get("/api/me", async (req, res) => {
   try {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
 
-    const user = await User.findOne({ userId: req.session.userId });
+    const user = await User.findOne(
+      { userId: req.session.userId },
+      "userId email profileIcon"
+    );
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const verification = await Verification.findOne({ userId: user.userId });
-    if (!verification || !verification.droppedPin) {
-      return res.status(404).json({ error: "No buyer droppedPin found" });
-    }
+
+    // ✅ Always return a safe profileIcon
+    const profileIcon = user.profileIcon || "https://via.placeholder.com/150?text=No+Photo";
 
     res.json({
       userId: user.userId,
       email: user.email,
-      droppedPin: verification.droppedPin,
+      profileIcon, // <-- always safe now
+      droppedPin: verification?.droppedPin || null,
     });
   } catch (err) {
     console.error("Error in /api/me:", err);
@@ -490,8 +494,12 @@ app.get("/api/profile", requireLogin, async (req, res) => {
       "address"
     );
 
+    // ✅ Always return a safe URL (user photo OR placeholder)
+    const profileIcon = user.profileIcon || "https://via.placeholder.com/150?text=No+Photo";
+
     res.json({
       ...user.toObject(),
+      profileIcon,
       address: verification ? verification.address : null,
     });
   } catch (err) {
@@ -564,8 +572,12 @@ app.get("/api/users/:userId", async (req, res) => {
       "address"
     );
 
+    // ✅ Same safe fallback
+    const profileIcon = user.profileIcon || "https://via.placeholder.com/150?text=No+Photo";
+
     res.json({
       ...user.toObject(),
+      profileIcon,
       address: verification ? verification.address : null,
     });
   } catch (err) {
