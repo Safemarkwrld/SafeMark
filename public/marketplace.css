@@ -370,11 +370,11 @@ search-results {
   flex-direction: row;
   align-items: center;
 }
-#seller-profile-photo{
+.seller-profile-photo{
   height: 30px;
   width: 30px;
   border-radius: 50%;
-  border: grey 1px solid;
+  border: grey 1.5px solid;
   margin-right: 3px;
 }
 
