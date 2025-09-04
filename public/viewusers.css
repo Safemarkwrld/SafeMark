@@ -7,7 +7,7 @@ html, body {
   height: 100vh;
 }
 body{
-  background-image: url("file_00000000f36061f69a288b51c145c8d7.png");
+  background-color: white;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -15,7 +15,7 @@ body{
   font-family: Poppins, Arial, Helvetica, sans-serif;
   font-size: 12px;
   display: flex;
-  color: white;
+  color: #444;
 }
 .parent{
   width: 100%;
@@ -143,42 +143,29 @@ body{
   height: 16px;
   width: 16px;
 }
-.profile-picture{
-  position: relative;
-}
 .profile-card{
-  background-color: rgb(235, 235, 235, 0.1);
-  backdrop-filter: blur(150px);
+  background-color: rgba(230, 230, 230, 0.8);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 80px;
+  padding-top: 50px;
+  position: relative;
+  margin:10px 15px;
+}
+.profile-picture{
   position: relative;
 }
 #profilePhoto{
-  height: 100px;
-  width: 100px;
-  border: white 2px solid;
+  height: 130px;
+  width: 130px;
+  border: white 3px solid;
+  box-shadow: rgb(0,0,0,0.25) 0 0 16px;
   border-radius: 50%;
   padding: 0;
-}
-.editBtn{
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  padding: 4px 6px;
-  border: none;
-  background-color: white;
-  color: black;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.editBtn:hover{
-  background-color: #0078d4;
-  color: white;
 }
 
 #user-status{

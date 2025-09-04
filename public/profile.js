@@ -1,17 +1,5 @@
 // profile.js
-function showMessage(text, type = "info", duration = 5000) {
-  const container = document.getElementById("messages");
-  if (!container) return;
 
-  const msg = document.createElement("div");
-  msg.className = `message ${type}`;
-  msg.textContent = text;
-  container.appendChild(msg);
-
-  setTimeout(() => {
-    msg.remove();
-  }, duration);
-}
 // -------------------- Render Status Badge --------------------
 function renderStatusBadge(user) {
   const badge = document.getElementById("user-status");
@@ -59,12 +47,12 @@ async function loadProfile() {
     // Render status badge
     renderStatusBadge(user);
 
-    // Profile photo
+    // ✅ Profile photo (direct URL or fallback)
     const profilePhoto = document.getElementById("profilePhoto");
     if (user.profileIcon) {
-      profilePhoto.src = `/api/profile-photo/${user.userId}?t=${Date.now()}`; // cache bust
+      profilePhoto.src = user.profileIcon; // Cloudinary URL with safe fallback
     } else {
-      profilePhoto.src = "default-avatar.png";
+      profilePhoto.src = "/default-avatar.png"; // must be absolute path
     }
   } catch (err) {
     console.error("Profile load error:", err);
@@ -85,9 +73,11 @@ async function uploadProfilePhoto(file) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Upload failed");
 
+    showMessage("✅ Profile photo updated", "success");
     loadProfile();
   } catch (err) {
     console.error("Upload error:", err);
+    showMessage("❌ Failed to upload profile photo", "error");
   }
 }
 
@@ -100,9 +90,11 @@ async function deleteProfilePhoto() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Delete failed");
 
+    showMessage("✅ Profile photo deleted", "success");
     loadProfile();
   } catch (err) {
     console.error("Delete error:", err);
+    showMessage("❌ Failed to delete profile photo", "error");
   }
 }
 
@@ -132,9 +124,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const photoInput = document.getElementById("photoInput");
 
   // Upload via menu
-  uploadBtnMenu.addEventListener("click", () => photoInput.click());
+  if (uploadBtnMenu) {
+    uploadBtnMenu.addEventListener("click", () => photoInput.click());
+  }
+
   // Upload via edit button on profile card
-  uploadBtnCard.addEventListener("click", () => photoInput.click());
+  if (uploadBtnCard) {
+    uploadBtnCard.addEventListener("click", () => photoInput.click());
+  }
 
   // When a file is chosen → upload it
   photoInput.addEventListener("change", (e) => {
@@ -142,5 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Delete photo
-  deleteBtn.addEventListener("click", deleteProfilePhoto);
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", deleteProfilePhoto);
+  }
 });

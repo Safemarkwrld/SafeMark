@@ -1,4 +1,4 @@
-// viewusers.js
+// -------------------- Render Status Badge --------------------
 function renderStatusBadge(user) {
   const badge = document.getElementById("user-status");
 
@@ -29,10 +29,9 @@ function renderStatusBadge(user) {
   }
 }
 
-
-
+// -------------------- Load Public Profile --------------------
 document.addEventListener("DOMContentLoaded", async () => {
-  const userId = window.location.hash.substring(1); // e.g. sm25mf3001
+  const userId = window.location.hash.substring(1); // e.g. #sm25mf3001
   if (!userId) {
     alert("No user selected");
     return;
@@ -49,28 +48,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("user-email").textContent = user.email;
     renderStatusBadge(user);
 
-    // Address (if exists)
+    // Address (from Verification)
     document.getElementById("homeAddress").textContent = user.address
-      ? `${user.address}`
+      ? user.address
       : "No address available";
 
-    // Profile photo
+    // ✅ Profile photo (direct Cloudinary URL or fallback)
     const photoEl = document.getElementById("profilePhoto");
-    if (user.profileIcon) {
-      photoEl.src = `/api/profile-photo/${user.userId}`;
-    } else {
-      photoEl.src = "default-avatar.png"; // fallback
-    }
+    photoEl.src = user.profileIcon || "default-avatar.png";
   } catch (err) {
     console.error("Error loading user:", err);
     alert("Failed to load profile");
   }
+
+  // Setup menu after page loads
+  setupMenu();
 });
 
+// -------------------- Menu Open/Close --------------------
 function setupMenu() {
   const openMenuBtn = document.getElementById("openmenu");
   const closeMenuBtn = document.getElementById("closemenu");
   const moreMenu = document.getElementById("more");
+
+  if (!openMenuBtn || !closeMenuBtn || !moreMenu) return;
 
   openMenuBtn.addEventListener("click", () => {
     moreMenu.style.display = "block";

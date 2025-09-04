@@ -7,7 +7,7 @@ html, body {
   height: 100vh;
 }
 body{
-  background-image: url("file_00000000f36061f69a288b51c145c8d7.png");
+  background-color: white;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -15,7 +15,7 @@ body{
   font-family: Poppins, Arial, Helvetica, sans-serif;
   font-size: 12px;
   display: flex;
-  color: white;
+  color: #252525;
 }
 .parent{
   width: 100%;
@@ -29,6 +29,8 @@ body{
   align-items: center;
   background-color: rgb(235, 235, 235);
   border-bottom: 2px solid grey;
+  box-shadow: rgb(0,0,0,0.2) 0 4px 16px;
+  z-index: 1000;
 }
 .topbar a{
   height: 25px;
@@ -60,22 +62,7 @@ body{
   flex-direction: row;
   align-items: center;
 }
-#messages {
-  margin-bottom: 1rem;
-}
-.message {
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-.message.error { background: #ffdddd; color: #a00; border: 1px solid #a00; }
-.message.success { background: #ddffdd; color: #070; border: 1px solid #070; }
-.message.info { background: #ddeeff; color: #005; border: 1px solid #005; }
 
-#more{
-  display: none;
-}
 .actual-menu{
   position: fixed;
   z-index: 10001;
@@ -134,44 +121,27 @@ body{
   background-color: rgb(199, 199, 199);
 }
 
-#viewusers{
-  text-decoration: none;
-  color: black;
-  width: 100%;
-  margin-top: 3px;
-  padding: 8px;
-  cursor: pointer;
-  border: none;
-  background-color: rgb(216, 216, 216);
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-#viewusers:hover{
-  background-color: rgb(199, 199, 199);
-}
-#searchIcon{
-  height: 16px;
-  width: 16px;
-}
-.profile-picture{
-  position: relative;
-}
 .profile-card{
-  background-color: rgb(235, 235, 235, 0.1);
-  backdrop-filter: blur(150px);
+  background-color: rgba(230, 230, 230, 0.8);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 80px;
+  padding-top: 50px;
+  position: relative;
+  margin:10px 15px;
+}
+.profile-picture{
   position: relative;
 }
 #profilePhoto{
-  height: 100px;
-  width: 100px;
-  border: white 2px solid;
+  height: 130px;
+  width: 130px;
+  border: white 3px solid;
+  box-shadow: rgb(0,0,0,0.25) 0 0 16px;
   border-radius: 50%;
   padding: 0;
 }
@@ -179,7 +149,7 @@ body{
   position: absolute;
   bottom: 0;
   right: 0;
-  padding: 4px 6px;
+  padding: 6px 10px;
   border: none;
   background-color: white;
   color: black;
@@ -189,22 +159,8 @@ body{
   justify-content: center;
 }
 .editBtn:hover{
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  padding: 4px 6px;
-  border: none;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background-color: #0078d4;
   color: white;
-}
-.two:hover,
-.two:hover,
-.two:hover ~ .one{
-  border: #0078d4 2px solid;
 }
 
 #user-status{
@@ -249,4 +205,70 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  margin-top: 5px;
+  border-bottom: 3px solid grey;
+  padding-bottom: 3px;
+}
+.user-address{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 2px;
+  align-items: center;
+}
+.my-address{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+#ver-address{
+  font-weight: bold;
+}
+.content{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+  margin-top: 5px;
+}
+
+#exploreBtn{
+  display: flex;
+  padding: 8px 16px;
+  border: 1.5px solid #0078d4;
+  background-color: #0078d4;
+  color: white;
+  width: 60%;
+  text-decoration: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: bold;
+} #exploreBtn:hover{
+  background-color: transparent;
+  color: #0078d4;
+  border: #0078d4 1.5px solid;
+  transition: background 0.7s ease-in, 
+              color 150ms ease,
+              border 120ms ease-out;
+}
+#learnBtn{
+  display: flex;
+  padding: 8px 16px;
+  border: 1.5px solid #444;
+  background-color: transparent;
+  color: #444;
+  text-decoration: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+} #learnBtn:hover{
+  background-color: #444;
+  color: white;
+  border: #444 1.5px solid;
+  transition: background 120ms ease-in, 
+              color 150ms ease,
+              border 120ms ease-out;
 }
