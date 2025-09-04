@@ -322,8 +322,21 @@ search-results {
 .binIcon{
   height: 20px;
   width: 20px;
-
 }
+.cart-btn{
+  border: none;
+  background-color: transparent;
+  display: contents;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+.cart-icon{
+  height: 20px;
+  width: 20px;
+}
+
 /*Search item card*/
 .searchItem-card{
   display: flex;
@@ -425,10 +438,6 @@ search-results {
   font-weight: bold;
   width: 100%;
 }
-
-
-
-
 
 .remove-cart-btn{
   border: none;

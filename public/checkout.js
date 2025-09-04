@@ -387,81 +387,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     injectSelectedDeliveries(checkout);
     calculateGrandTotal();
 
-    // -------------------- INJECT PAYMENT CARDS --------------------
-    const paymentCardsDiv = document.querySelector(".payment-cards");
-    if (paymentCardsDiv) {
-      paymentCardsDiv.innerHTML = `
-        <h3 id="methods">Payment methods:</h3>
-        <div class="card-with-discount">
-          <h3>Binance Pay (recommendend<a href="information.html#binancePay" id="infoLinks"> Why it?</a>)<img src="3246711.png" alt="binance icon"></h3>
-          <h5>Pay securely with Binance on SafeMark and enjoy an exclusive 15% discount.</h5>
-          <div class="benefits-BNB">
-            <details>
-              <summary>Advantages:</summary>
-              <li><b>Exclusive 15% Discount</b> - Save instantly when you choose Binance as your payment method.</li>
-              <li><b>Fast & Secure Transactions</b> - Enjoy near-instant confirmations with blockchain-level security.</li>
-              <li><b>Refundable Protection</b> - Eligible payments are covered by SafeMark's refund policy for added peace of mind.</li>
-            </details>
-          </div>
-          <div class="amount-section">
-            <p id="cost-amount"></p>
-            <p id="discount-amount"></p>
-            <h3 id="final-amount"></h3>
-          </div>
-          <div class="safemark-details">
-            <h4 id="pay-heading">Payment details:</h4>
-            <div class="bnb-details">
-              <h4>Binance ID: 1079187985</h4>
-              <button>Scan QR Code</button>
-            </div>
-          </div>
-          <div class="uploadPayment">
-            <h3>Upload proof of payment:</h3>
-            <div class="paymentproof">
-              <input type="file"><button type="submit" id="proof-of-payment"><img src="745052.png" alt="upload" id="upload-proof"></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="cardPayment">
-          <div class="icon-logos">
-            <img src="1592515.png" alt="logos">
-            <img src="158822.png" alt="logos">
-            <img src="1592497.png" alt="logos">
-            <img src="1592484.png" alt="logos">
-            <img src="1592479.png" alt="logos">
-            <img src="1592515.png" alt="logos">
-          </div>
-          <div class="banking-details">
-            <div class="card-number">
-              <p>Card Number:</p>
-              <input type="text" name="card-number" placeholder="0000 0000 0000 0000">
-            </div>
-            <div class="exp-csc">
-              <div class="expiration">
-                <p>expiration Date:</p>
-                <input type="text" placeholder="mm / yyyy">
-              </div>
-              <div class="csc">
-                <div class="card-security">
-                  <p>Card Security Code:</p>
-                  <input type="text" placeholder="0000">
-                </div>
-                <div class="card-icon">
-                  <img src="3503359.png" alt="card icon" id="card-icon">
-                </div>
-              </div>     
-            </div>
-            <div class="amount">
-              <p>Amount:</p>
-              <h3 id="card-amount">R5,000</h3>
-            </div>
-            <button>pay now</button>
-          </div>
-        </div>
-      `;
-    }
-
     // -------------------- PAYMENT PROOF --------------------
     document.getElementById("proof-of-payment")?.addEventListener("click", async (e) => {
   e.preventDefault();
@@ -716,8 +641,5 @@ function initSteps() {
     showStep(currentStep);
     injectSelectedDeliveries(window.globalCheckout);
     calculateGrandTotal();
-  });
-
-  document.getElementById("confirmation-btn")?.addEventListener("click", () => {
   });
 }

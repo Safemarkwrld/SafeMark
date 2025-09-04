@@ -59,15 +59,6 @@ async function loadMyItems() {
             <p><b>Code: </b>${item.productCode}</p>
             <p><b>Quantity: </b>${item.quantity}</p>
             <p><b>Description: </b>${item.description}</p>
-            <div class="seller-details">
-              <a href="viewusers.html#${item.seller?.userId || ""}" class="seller-link">
-                <img src="${item.seller?.userId ? `/api/profile-photo/${item.seller.userId}` : 'default-avatar.png'}" alt="profile photo" id="seller-profile-photo">
-                <h4 class="seller-name">
-                  ${item.seller?.firstName || "Unknown"} ${item.seller?.lastName || ""}
-                </h4>
-              </a>
-              <p id="seller-address"></p>
-            </div>
           </div>
           <div class="right-box">
             <div class="iconAndPrice">
@@ -187,17 +178,20 @@ document.getElementById("search-form").addEventListener("submit", async (e) => {
 
       const inCart = cartMap.has(item.productCode);
 
+      const sellerIcon = item.seller?.profileIcon
+        ? item.seller.profileIcon
+        : "/default-avatar.png";
+
       card.innerHTML = `
         <div class="itemCard-container">
           ${imgHTML}
           <div class="item-details">
             <h3>${item.name}</h3>
-            <p><b>Code: </b>${item.productCode}</p>
             <p><b>Available: </b>${item.quantity}</p>
             <p><b>Description: </b>${item.description}</p>
             <div class="seller-details">
               <a href="viewusers.html#${item.seller?.userId || ""}" class="seller-link">
-                <img src="${item.seller?.userId ? `/api/profile-photo/${item.seller.userId}` : 'default-avatar.png'}" alt="profile photo" id="seller-profile-photo">
+                <img src="${sellerIcon}" alt="profile photo" class="seller-profile-photo">
                 <h4 class="seller-name">
                   ${item.seller?.firstName || "Unknown"} ${item.seller?.lastName || ""}
                 </h4>
@@ -213,7 +207,9 @@ document.getElementById("search-form").addEventListener("submit", async (e) => {
             <div class="add-removeCart">
               <label class="status-label">${inCart ? "In Cart" : "Not in Cart"}</label>
               <button class="cart-btn" data-code="${item.productCode}">
-                ${inCart ? "🗑 Remove" : "🛒 Add"}
+                <img src="${inCart ? "remove-from-cart.png" : "add-to-cart.png"}" 
+                     alt="${inCart ? "Remove from Cart" : "Add to Cart"}" 
+                     class="cart-icon">
               </button>
             </div>
           </div>
@@ -243,12 +239,15 @@ function updateSearchButtons() {
     const code = card.querySelector(".cart-btn").dataset.code;
     const btn = card.querySelector(".cart-btn");
     const statusLabel = card.querySelector(".status-label");
+    const img = btn.querySelector("img");
 
     if (cartMap.has(code)) {
-      btn.textContent = "🗑 Remove";
+      img.src = "remove-from-cart.png";
+      img.alt = "Remove from Cart";
       statusLabel.textContent = "In Cart";
     } else {
-      btn.textContent = "🛒 Add";
+      img.src = "add-to-cart.png";
+      img.alt = "Add to Cart";
       statusLabel.textContent = "Not in Cart";
     }
   });
@@ -306,13 +305,14 @@ async function loadCartItems() {
         ${imgHTML}
         <div class="item-details">
           <h3>${item.name}</h3>
-          <p><b>Code: </b>${item.productCode}</p>
           <p><b>Quantity: </b>${item.quantity}</p>
           <p><b>Description: </b>${item.description || "No description"}</p>
           <a href="information.html#testFeature" id="infoLinks">test feature?</a>
           <div class="seller-details">
             <a href="viewusers.html#${item.seller?.userId || ""}" class="seller-link">
-              <img src="${item.seller?.userId ? `/api/profile-photo/${item.seller.userId}` : 'default-avatar.png'}" alt="profile photo" id="seller-profile-photo">
+              <img src="${item.seller?.profileIcon || "/default-avatar.png"}" 
+                  alt="profile photo" 
+                  class="seller-profile-photo">
               <h4 class="seller-name">
                 ${item.seller?.firstName || "Unknown"} ${item.seller?.lastName || ""}
               </h4>
