@@ -192,7 +192,7 @@ body{
     justify-content: center;
 }
 #verified-status{
-    color: white;
+    color: #444;
 }
 #pending-status{
     color: orange;

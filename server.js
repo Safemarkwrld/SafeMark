@@ -16,36 +16,27 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-async function uploadToCloudinary(buffer, folder = "safemark", publicId) {
-  if (!buffer) return null;
+async function uploadToCloudinary(file, folder = "safemark", publicId) {
+  if (!file || !file.buffer) return null;
 
-  if (!process.env.CLOUDINARY_CLOUD_NAME ||
-      !process.env.CLOUDINARY_API_KEY ||
-      !process.env.CLOUDINARY_API_SECRET) {
-    console.warn("Cloudinary env variables missing!");
-    return null;
-  }
+  const opts = { folder };
+  if (publicId) opts.public_id = publicId;
 
   return new Promise((resolve, reject) => {
-    try {
-      const opts = { folder };
-      if (publicId) opts.public_id = publicId;
+    const uploadStream = cloudinary.uploader.upload_stream(opts, (err, result) => {
+      if (err) return reject(err);
+      resolve({ url: result.secure_url, public_id: result.public_id });
+    });
 
-      const uploadStream = cloudinary.uploader.upload_stream(opts, (err, result) => {
-        if (err) return reject(err);
-        resolve(result.secure_url);
-      });
-
-      const readStream = new Readable();
-      readStream._read = () => {};
-      readStream.push(buffer);
-      readStream.push(null);
-      readStream.pipe(uploadStream);
-    } catch (err) {
-      reject(err);
-    }
+    const readStream = new Readable();
+    readStream._read = () => {};
+    readStream.push(file.buffer); // ✅ always file.buffer
+    readStream.push(null);
+    readStream.pipe(uploadStream);
   });
 }
+
+
 const app = express();
 
 // -------------------- Middleware --------------------

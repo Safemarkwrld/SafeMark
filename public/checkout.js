@@ -513,7 +513,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
       <div class="uploadPayment">
         <h3>Upload proof of payment:</h3>
         <div class="paymentproof">
-          <input type="file"><button type="submit" id="proof-of-payment"><img src="745052.png" alt="upload" id="upload-proof"></button>
+          <input type="file"><button type="submit" id="proof-of-payment" required><img src="745052.png" alt="upload" id="upload-proof"></button>
         </div>
       </div>
     </div>
@@ -551,7 +551,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
           <p>Amount:</p>
           <h3 id="card-amount">R5,000</h3>
         </div>
-        <button>pay now</button>
+        <button onclick="cardpayBtn()">pay now</button>
       </div>
     </div>
   `;
@@ -643,3 +643,4 @@ function initSteps() {
     calculateGrandTotal();
   });
 }
+cardpayBtn("alert(`Sorry try other payment methods, this method is currently unavailable`)")

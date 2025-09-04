@@ -191,12 +191,13 @@ document.getElementById("search-form").addEventListener("submit", async (e) => {
             <p><b>Description: </b>${item.description}</p>
             <div class="seller-details">
               <a href="viewusers.html#${item.seller?.userId || ""}" class="seller-link">
-                <img src="${sellerIcon}" alt="profile photo" class="seller-profile-photo">
+                <img src="${item.seller?.profileIcon || "/default-avatar.png"}" 
+                  alt="profile photo" 
+                  class="seller-profile-photo">
                 <h4 class="seller-name">
                   ${item.seller?.firstName || "Unknown"} ${item.seller?.lastName || ""}
                 </h4>
               </a>
-              <p id="seller-address"></p>
             </div>
           </div>
           <div class="right-box">
