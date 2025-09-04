@@ -580,10 +580,12 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
     // Fetch seller verification for droppedPin
     const verification = await Verification.findOne({ userId: req.session.userId });
 
-    // ✅ Upload item images to Cloudinary using unified helper
-    const images = await Promise.all(
-      (req.files || []).map(file => uploadToCloudinary(file, "items"))
+    // ✅ Upload item images to Cloudinary (store only URLs)
+    const uploadedImages = await Promise.all(
+      (req.files || []).map(file => uploadToCloudinary(file.buffer, "items"))
     );
+
+    const images = uploadedImages.filter(url => !!url); // make sure null/undefined are removed
 
     const newItem = new Item({
       productCode,
@@ -592,7 +594,7 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
       description: req.body.description,
       price: Number(req.body.price),
       quantity: Number(req.body.quantity),
-      images, // ✅ now only URLs
+      images, // ✅ now array of strings (URLs only)
       droppedPin: verification?.droppedPin || null,
     });
 
@@ -623,20 +625,9 @@ app.delete("/items/:id", requireLogin, async (req, res) => {
     const item = await Item.findOne({ _id: req.params.id, ownerId: req.session.userId });
     if (!item) return res.status(404).send("Item not found or not authorized");
 
-    // ✅ Remove images from Cloudinary if stored with public_id
-    if (item.images && item.images.length > 0) {
-      for (const img of item.images) {
-        if (img.public_id) {
-          try {
-            await cloudinary.uploader.destroy(img.public_id);
-          } catch (err) {
-            console.error("Cloudinary delete failed:", err);
-          }
-        }
-      }
-    }
-
+    // ⚠ Skip Cloudinary destroy since we only stored URLs
     await item.deleteOne();
+
     res.send("✅ Item deleted");
   } catch (err) {
     console.error("Delete item error:", err);
