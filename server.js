@@ -561,9 +561,12 @@ app.get("/api/users/:userId", async (req, res) => {
       "address"
     );
 
+    // ✅ Always return safe fallback photo + address
     res.json({
       ...user.toObject(),
-      profileIcon: safeProfileIcon(user.profileIcon), // ✅ fallback
+      profileIcon: user.profileIcon && user.profileIcon.trim() !== ""
+        ? user.profileIcon
+        : "/default-avatar.png",
       address: verification ? verification.address : null,
     });
   } catch (err) {
