@@ -16,26 +16,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-async function uploadToCloudinary(file, folder = "safemark", publicId) {
-  if (!file || !file.buffer) return null;
-
-  const opts = { folder };
-  if (publicId) opts.public_id = publicId;
-
+// -------------------- Cloudinary Upload Helper --------------------
+async function uploadToCloudinary(fileBuffer, folder) {
   return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(opts, (err, result) => {
-      if (err) return reject(err);
-      resolve({ url: result.secure_url, public_id: result.public_id });
-    });
+    const stream = cloudinary.uploader.upload_stream(
+      { folder },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url); // ✅ always return just the URL
+      }
+    );
 
-    const readStream = new Readable();
-    readStream._read = () => {};
-    readStream.push(file.buffer); // ✅ always file.buffer
-    readStream.push(null);
-    readStream.pipe(uploadStream);
+    // Ensure Buffer (fix ArrayBuffer issue)
+    stream.end(Buffer.from(fileBuffer));
   });
 }
-
 
 const app = express();
 
@@ -359,9 +354,17 @@ app.post(
         return result.secure_url;
       };
 
-      const idFrontUrl = await uploadToCloudinary(req.files["idFront"]?.[0], "verification");
-      const idBackUrl = await uploadToCloudinary(req.files["idBack"]?.[0], "verification");
-      const selfieUrl = await uploadToCloudinary(req.files["selfie"]?.[0], "verification");
+      const idFrontUrl = req.files["idFront"]
+        ? await uploadToCloudinary(req.files["idFront"][0].buffer, "verification")
+        : null;
+
+      const idBackUrl = req.files["idBack"]
+        ? await uploadToCloudinary(req.files["idBack"][0].buffer, "verification")
+        : null;
+
+      const selfieUrl = req.files["selfie"]
+        ? await uploadToCloudinary(req.files["selfie"][0].buffer, "verification")
+        : null;
 
       // Save or overwrite verification
       await Verification.findOneAndUpdate(
@@ -505,17 +508,14 @@ app.post("/api/profile-photo", requireLogin, uploadMemory.single("profilePhoto")
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    // Upload to Cloudinary
-    const b64 = req.file.buffer.toString("base64");
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-    const result = await cloudinary.uploader.upload(dataURI, { folder: "profile" });
+    const imageUrl = await uploadToCloudinary(req.file.buffer, "profile");
 
     await User.updateOne(
       { userId: req.session.userId },
-      { $set: { profileIcon: result.secure_url } }
+      { $set: { profileIcon: imageUrl } }
     );
 
-    res.json({ message: "✅ Profile photo updated", url: result.secure_url });
+    res.json({ message: "✅ Profile photo updated", url: imageUrl });
   } catch (err) {
     console.error("Profile upload error:", err);
     res.status(500).json({ error: "Failed to upload profile photo" });
@@ -580,12 +580,12 @@ app.post("/items/add", requireLogin, uploadMemory.array("images", 5), async (req
     // Fetch seller verification for droppedPin
     const verification = await Verification.findOne({ userId: req.session.userId });
 
-    // ✅ Upload item images to Cloudinary (store only URLs)
+    // ✅ Upload item images
     const uploadedImages = await Promise.all(
       (req.files || []).map(file => uploadToCloudinary(file.buffer, "items"))
     );
 
-    const images = uploadedImages.filter(url => !!url); // make sure null/undefined are removed
+    const images = uploadedImages.filter(Boolean); // only URLs
 
     const newItem = new Item({
       productCode,
@@ -950,7 +950,7 @@ app.post("/api/payments/upload-proof", requireLogin, uploadMemory.single("proof"
 
     let proofUrl = null;
     if (req.file) {
-      proofUrl = await uploadProofToCloudinary(req.file.buffer);
+      proofUrl = await uploadToCloudinary(req.file.buffer, "payment_proofs");
     }
 
     const payment = new Payment({
