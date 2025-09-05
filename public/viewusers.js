@@ -81,3 +81,27 @@ function setupMenu() {
     moreMenu.style.display = "none";
   });
 }
+
+function requestBtn(){
+  const requestBtn = document.querySelector('.requestBtn');
+  if (requestBtn.innerHTML === 'Request'){
+    requestBtn.innerHTML = 'Cancel request'
+    requestBtn.classList.add('cancel-request');
+    alert(`Request sent!`)
+  } else {
+    requestBtn.innerHTML = 'Request'
+    requestBtn.classList.remove('cancel-request')
+    alert(`Request cancelled!`)
+  }
+};
+function reportBtn(){
+  const reportBtn = document.querySelector('.reportBtn');
+  if (reportBtn.innerHTML === 'Report'){
+    reportBtn.innerHTML = 'Reported'
+    reportBtn.classList.add('reported')
+    alert(`User reported! SafeMark will start investigating.`)
+  } else {
+    reportBtn.innerHTML = 'Report'
+    reportBtn.classList.remove('reported')
+  }
+};

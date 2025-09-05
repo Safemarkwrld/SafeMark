@@ -3,7 +3,7 @@
 // -------------------- Render Status Badge --------------------
 function renderStatusBadge(user) {
   const badge = document.getElementById("user-status");
-  const addressStatus = document.querySelector('.addressStatus').innerText
+  const addressStatus = document.querySelector('.addressStatus');
 
   if (user.verified) {
     badge.innerHTML = `
@@ -12,7 +12,7 @@ function renderStatusBadge(user) {
         <p id="verified-status">Verified</p>
       </div>
     `;
-    addressStatus = 'Address verified by Google and Safemark.';
+    addressStatus.innerText = 'Address verified by Safemark.';
   } else if (user.pending) {
     badge.innerHTML = `
       <div class="statusId">
@@ -20,7 +20,7 @@ function renderStatusBadge(user) {
         <p id="pending-status">Pending</p>
       </div>
     `;
-    addressStatus = 'Address under review, on Google Maps';
+    addressStatus.innerText = 'Address under review, on Google Maps';
   } else {
     badge.innerHTML = `
       <div class="holder">
@@ -31,7 +31,7 @@ function renderStatusBadge(user) {
         <a href="verification.html" id="re-upload">Re-Upload documents</a>
       </div>
     `;
-    addressStatus = 'Address not verified yet...';
+    addressStatus.innerText = "Couldn't verify your address...";
   }
 }
 
@@ -113,27 +113,24 @@ function closeMenu() {
 // -------------------- Init --------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadProfile();
-  setupMenu();
-
-  const uploadBtnMenu = document.querySelector(".photo-actions #uploadBtn");
-  const uploadBtnCard = document.querySelector(".profile-picture #uploadBtn");
-  const deleteBtn = document.getElementById("deleteBtn");
-  const photoInput = document.getElementById("photoInput");
-
-  // Upload via menu
-  if (uploadBtnMenu) {
-    uploadBtnMenu.addEventListener("click", () => photoInput.click());
-  }
-
-  // Upload via edit button on profile card
-  if (uploadBtnCard) {
-    uploadBtnCard.addEventListener("click", () => photoInput.click());
-  }
-
-  // When a file is chosen → upload it
-  photoInput.addEventListener("change", (e) => {
-    if (e.target.files.length) uploadProfilePhoto(e.target.files[0]);
+  
+  const uploadBtnCard = document.getElementById("uploadMainBtn");
+  const uploadBtnMenu = document.getElementById("uploadMenuBtn");
+  const photoInput    = document.getElementById("photoInput");
+  const deleteBtn     = document.getElementById("deleteBtn");
+  // open file chooser from either button
+  [uploadBtnCard, uploadBtnMenu].forEach(btn => {
+    if (btn) btn.addEventListener("click", () => photoInput.click());
   });
+
+  // when a file is chosen → upload
+  if (photoInput) {
+    photoInput.addEventListener("change", e => {
+      if (e.target.files && e.target.files[0]) {
+        uploadProfilePhoto(e.target.files[0]);
+      }
+    });
+  }
 
   // Delete photo
   if (deleteBtn) {

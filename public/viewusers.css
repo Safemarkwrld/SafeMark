@@ -238,27 +238,45 @@ body{
   margin-top: 5px;
 }
 
-#request{
+.requestBtn{
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 5px 10px;
   background-color: #0078d4;
-  border: #0078d4 2px solid;
+  border: #0078d4 1px solid;
   border-radius: 4px;
   color: white;
   width: 50%;
   margin: 0 5px;
 }
-#request:hover{
+.requestBtn:hover{
   background-color: #006dc0;
-  border: #006dc0 2px solid;
+  border: #006dc0 1px solid;
 }
-#report{
+.cancel-request{
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 6px 10px;
+  padding: 5px 10px;
+  background-color: transparent;
+  border: rgb(180, 180, 180) 1.5px solid;
+  border-radius: 4px;
+  color: #444;
+  width: 50%;
+  margin: 0 5px;
+}
+.cancel-request:hover{
+  background-color: #0078d4;
+  border: #0078d4 1px solid;
+  color: white;
+}
+
+.reportBtn{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
   background-color: rgb(219, 219, 219, 0.5);
   border: #444 1px solid;
   border-radius: 4px;
@@ -266,8 +284,24 @@ body{
   width: 30%;
   margin: 0 5px;
 }
-#report:hover{
+.reportBtn:hover{
   background-color: #444;
   color: white;
   transition: background 0.6s ease, color 0.8s ease-in-out;
+}
+.reported{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
+  background-color: #444;
+  border: #444 1px solid;
+  border-radius: 4px;
+  color: white;
+  width: 30%;
+  margin: 0 5px;
+}
+.reported:hover{
+  background-color: rgb(219, 219, 219, 0.5);
+  color: #444;
 }

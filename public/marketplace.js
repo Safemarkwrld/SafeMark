@@ -178,9 +178,7 @@ document.getElementById("search-form").addEventListener("submit", async (e) => {
 
       const inCart = cartMap.has(item.productCode);
 
-      const sellerIcon = item.seller?.profileIcon
-        ? item.seller.profileIcon
-        : "/default-avatar.png";
+      const sellerIcon = item.seller?.profileIcon || "/default-avatar.png";
 
       card.innerHTML = `
         <div class="itemCard-container">
