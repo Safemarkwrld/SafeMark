@@ -3,6 +3,7 @@
 // -------------------- Render Status Badge --------------------
 function renderStatusBadge(user) {
   const badge = document.getElementById("user-status");
+  const addressStatus = document.querySelector('.addressStatus').innerText
 
   if (user.verified) {
     badge.innerHTML = `
@@ -11,6 +12,7 @@ function renderStatusBadge(user) {
         <p id="verified-status">Verified</p>
       </div>
     `;
+    addressStatus = 'Address verified by Google and Safemark.';
   } else if (user.pending) {
     badge.innerHTML = `
       <div class="statusId">
@@ -18,6 +20,7 @@ function renderStatusBadge(user) {
         <p id="pending-status">Pending</p>
       </div>
     `;
+    addressStatus = 'Address under review, on Google Maps';
   } else {
     badge.innerHTML = `
       <div class="holder">
@@ -28,6 +31,7 @@ function renderStatusBadge(user) {
         <a href="verification.html" id="re-upload">Re-Upload documents</a>
       </div>
     `;
+    addressStatus = 'Address not verified yet...';
   }
 }
 
@@ -98,19 +102,12 @@ async function deleteProfilePhoto() {
   }
 }
 
-// -------------------- Menu Open/Close --------------------
-function setupMenu() {
-  const openMenuBtn = document.getElementById("openmenu");
-  const closeMenuBtn = document.getElementById("closemenu");
-  const moreMenu = document.getElementById("more");
-
-  openMenuBtn.addEventListener("click", () => {
-    moreMenu.style.display = "block";
-  });
-
-  closeMenuBtn.addEventListener("click", () => {
-    moreMenu.style.display = "none";
-  });
+const myMenu = document.querySelector('.bottom-menu')
+function openMenu(){
+  myMenu.classList.add('menu-active');
+}
+function closeMenu() {
+  myMenu.classList.remove('menu-active');
 }
 
 // -------------------- Init --------------------

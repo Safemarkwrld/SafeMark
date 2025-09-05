@@ -14,21 +14,7 @@
           <h2>My Profile</h2>
         </div>
 
-        <button id="openmenu"><img src="Dot-More-Vertical-Menu-64.webp"></button>
-      </div>
-      <div class="more" id="more">
-        <div class="actual-menu">
-          <div class="topmenu">
-
-            <button class="closemenu" id="closemenu"><img src="closeicon2234.webp"></button>
-          </div>
-          <div class="photo-actions">
-            <p>Make profile changes</p>
-            <input type="file" id="photoInput" accept="image/*" hidden>
-            <button id="uploadBtn">Upload new profile photo</button>
-            <button id="deleteBtn">Delete profile photo</button>
-          </div>
-        </div>
+        <div></div>
       </div>
       <div class="profile-card">
         <div class="profile-picture">
@@ -43,11 +29,43 @@
           <div id="user-status"></div>
           <div class="user-address">
             <div class="my-address"><p style="color: black;"><b>Address:</b></p><p id="homeAddress">Loading address...</p></div>
-            <p id="ver-address">Verified by Google & SafeMark</p>
+            <p id="ver-address" class="addressStatus">Loading address status...</p>
           </div>
         </div>
         <div class="content">
-          <a href="marketplace.html" id="exploreBtn">Explore</a> <a href="information.html#how-to-use" id="learnBtn">Learn More</a>
+          <a href="marketplace.html" id="exploreBtn">Explore</a> <a href="information.html#how-to-use" id="learnBtn">Learn More</a> <button onclick="openMenu()" id="openmenu"><img src="10733013.png"></button>
+        </div>
+      </div>
+      <div class="bottom-menu">
+        <div class="first-container">
+          <h4>Profile settings</h4> <button onclick="closeMenu()"><img src="9788697.png"></button>
+        </div>
+        <h4>Manage profile</h4>
+        <div class="makeProfile-changes">
+          <div class="photo-actions">
+            <img src="icons_user2-64.webp" alt="User" class="content-icon">
+            <button id="uploadBtn">Change profile photo <img src="3311520.png" alt="Select" id="rightArrow"></button>
+          </div>
+          <div class="photo-actions">
+            <img src="icons_user2-64.webp" alt="User" class="content-icon">
+            <button id="deleteBtn">Delete profile photo <img src="3311520.png" alt="Select" id="rightArrow"></button>
+          </div>
+        </div>
+        <h4>Personal details</h4>
+        <div class="personal-changes">
+          <div class="each-detail">
+            <img src="960846.png" alt="mail" class="content-icon">
+            <p>Change email<img src="3311520.png" alt="Select" id="rightArrow"></p>
+          </div>
+          <div class="each-detail">
+            <img src="2263539.png" alt="User" class="content-icon">
+            <p>Change user names<img src="3311520.png" alt="Select" id="rightArrow"></p>
+          </div>
+          <div class="each-detail">
+            <img src="3652990.png" alt="Phone" class="content-icon">
+            <p>Change phone number<img src="3311520.png" alt="Select" id="rightArrow"></p>
+          </div>
+          <a href="information.html#how-to-use"><h4>Learn more...</h4></a>     
         </div>
       </div>
     </div>
