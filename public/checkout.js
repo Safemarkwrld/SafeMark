@@ -556,6 +556,9 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
     </div>
   `;
 }
+function cardpayBtn(){
+  alert('This payment method is currently unavailable');
+};
 
 async function refreshOrderStatus() {
   try {

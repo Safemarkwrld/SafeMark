@@ -644,12 +644,21 @@ app.get("/items/search", requireLogin, async (req, res) => {
 
     const itemsWithSeller = await Promise.all(
       items.map(async item => {
-        const seller = await User.findOne({ userId: item.ownerId }, "firstName lastName");
+        const seller = await User.findOne(
+          { userId: item.ownerId },
+          "userId firstName lastName profileIcon"
+        );
+
         return {
           ...item.toObject(),
           images: item.images,
           seller: seller
-            ? { userId: item.ownerId, firstName: seller.firstName, lastName: seller.lastName }
+            ? {
+                userId: seller.userId,
+                firstName: seller.firstName,
+                lastName: seller.lastName,
+                profileIcon: seller.profileIcon,
+              }
             : null,
         };
       })

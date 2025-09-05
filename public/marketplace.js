@@ -203,7 +203,6 @@ document.getElementById("search-form").addEventListener("submit", async (e) => {
               <h3 class="price-tag">R${Number(item.price).toFixed(2)}</h3>
             </div>
             <div class="add-removeCart">
-              <label class="status-label">${inCart ? "In Cart" : "Not in Cart"}</label>
               <button class="cart-btn" data-code="${item.productCode}">
                 <img src="${inCart ? "remove-from-cart.png" : "add-to-cart.png"}" 
                      alt="${inCart ? "Remove from Cart" : "Add to Cart"}" 

@@ -12,7 +12,7 @@ function renderStatusBadge(user) {
         <p id="verified-status">Verified</p>
       </div>
     `;
-    addressStatus.innerText = 'Address verified by Safemark.';
+    addressStatus.innerText = 'Address verified by Google and Safemark.';
   } else if (user.pending) {
     badge.innerHTML = `
       <div class="statusId">

@@ -1,6 +1,7 @@
 // -------------------- Render Status Badge --------------------
 function renderStatusBadge(user) {
   const badge = document.getElementById("user-status");
+  const addressStatus = document.querySelector('.addressStatus');
 
   if (user.verified) {
     badge.innerHTML = `
@@ -9,6 +10,7 @@ function renderStatusBadge(user) {
         <p id="verified-status">Verified</p>
       </div>
     `;
+    addressStatus.innerText = 'Address verified by Google and Safemark.';
   } else if (user.pending) {
     badge.innerHTML = `
       <div class="statusId">
@@ -16,6 +18,7 @@ function renderStatusBadge(user) {
         <p id="pending-status">Pending</p>
       </div>
     `;
+    addressStatus.innerText = 'Address under review, on Google Maps';
   } else {
     badge.innerHTML = `
       <div class="holder">
@@ -26,6 +29,7 @@ function renderStatusBadge(user) {
         <a href="verification.html" id="re-upload">Re-Upload documents</a>
       </div>
     `;
+    addressStatus.innerText = "Couldn't verify your address...";
   }
 }
 
