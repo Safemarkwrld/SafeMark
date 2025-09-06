@@ -345,15 +345,7 @@ app.post(
         return res.status(400).json({ error: "Latitude/Longitude must be within South Africa." });
       }
 
-      // ✅ Upload files to Cloudinary
-      const uploadToCloudinary = async (file, folder) => {
-        if (!file) return null;
-        const b64 = file.buffer.toString("base64");
-        const dataURI = `data:${file.mimetype};base64,${b64}`;
-        const result = await cloudinary.uploader.upload(dataURI, { folder });
-        return result.secure_url;
-      };
-
+      // ✅ Upload files to Cloudinary (using global helper)
       const idFrontUrl = req.files["idFront"]
         ? await uploadToCloudinary(req.files["idFront"][0].buffer, "verification")
         : null;
@@ -448,9 +440,8 @@ app.post("/verification/reject/:userId", async (req, res) => {
 
 // -------------------- Helper: Safe Profile Icon --------------------
 function safeProfileIcon(icon) {
-  return icon && icon.trim() !== ""
-    ? icon
-    : "/default-avatar.png"; // ✅ served from public/
+  if (icon && icon.trim() !== "") return icon;
+  return `${process.env.BASE_URL || "http://localhost:3000"}/default-avatar.png`;
 }
 
 //=============Users' Profiles===============

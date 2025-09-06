@@ -1,8 +1,7 @@
 // -------------------- Helper: Safe Profile Icon --------------------
 function safeProfileIcon(icon) {
-  return icon && icon.trim() !== ""
-    ? icon
-    : "/default-avatar.png"; // ✅ served from public/
+  if (icon && icon.trim() !== "") return icon;
+  return `${window.location.origin}/default-avatar.png`; 
 }
 
 // -------------------- Render Status Badge --------------------
