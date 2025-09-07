@@ -3,7 +3,7 @@
 // -------------------- Helper: Safe Profile Icon --------------------
 function safeProfileIcon(icon) {
   if (icon && icon.trim() !== "") return icon;
-  return `${window.location.origin}/default-avatar.png`;
+  return "/default-avatar.png"; // ✅ always resolves from public/
 }
 
 // -------------------- Render Status Badge --------------------

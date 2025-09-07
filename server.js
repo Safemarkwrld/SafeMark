@@ -440,8 +440,8 @@ app.post("/verification/reject/:userId", async (req, res) => {
 
 // -------------------- Helper: Safe Profile Icon --------------------
 function safeProfileIcon(icon) {
-  if (icon && icon.trim() !== "") return icon; // Cloudinary URL
-  return `${process.env.BASE_URL || "http://localhost:3000"}/default-avatar.png`;
+  if (icon && icon.trim() !== "") return icon;
+  return "/default-avatar.png"; // ✅ always resolves from public/
 }
 
 // -------------------- My Profile (lightweight) --------------------
