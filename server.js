@@ -440,11 +440,11 @@ app.post("/verification/reject/:userId", async (req, res) => {
 
 // -------------------- Helper: Safe Profile Icon --------------------
 function safeProfileIcon(icon) {
-  if (icon && icon.trim() !== "") return icon;
+  if (icon && icon.trim() !== "") return icon; // Cloudinary URL
   return `${process.env.BASE_URL || "http://localhost:3000"}/default-avatar.png`;
 }
 
-//=============Users' Profiles===============
+// -------------------- My Profile (lightweight) --------------------
 app.get("/api/me", async (req, res) => {
   try {
     if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
@@ -453,14 +453,11 @@ app.get("/api/me", async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const verification = await Verification.findOne({ userId: user.userId });
-    if (!verification || !verification.droppedPin) {
-      return res.status(404).json({ error: "No buyer droppedPin found" });
-    }
 
     res.json({
       userId: user.userId,
       email: user.email,
-      droppedPin: verification.droppedPin,
+      droppedPin: verification?.droppedPin || null,
       profileIcon: safeProfileIcon(user.profileIcon),
     });
   } catch (err) {
@@ -469,7 +466,7 @@ app.get("/api/me", async (req, res) => {
   }
 });
 
-// -------------------- Profile API --------------------
+// -------------------- Profile (full private) --------------------
 app.get("/api/profile", requireLogin, async (req, res) => {
   try {
     const user = await User.findOne(
@@ -485,8 +482,8 @@ app.get("/api/profile", requireLogin, async (req, res) => {
 
     res.json({
       ...user.toObject(),
-      profileIcon: safeProfileIcon(user.profileIcon), // ✅ fallback
-      address: verification ? verification.address : null,
+      profileIcon: safeProfileIcon(user.profileIcon),
+      address: verification?.address || null,
     });
   } catch (err) {
     console.error("Profile fetch error:", err);
@@ -494,7 +491,7 @@ app.get("/api/profile", requireLogin, async (req, res) => {
   }
 });
 
-// ✅ Profile photo → Cloudinary
+// -------------------- Upload Profile Photo --------------------
 app.post("/api/profile-photo", requireLogin, uploadMemory.single("profilePhoto"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -513,23 +510,25 @@ app.post("/api/profile-photo", requireLogin, uploadMemory.single("profilePhoto")
   }
 });
 
+// -------------------- Fetch User's Photo (public) --------------------
 app.get("/api/profile-photo/:userId", async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.params.userId });
     if (!user) return res.status(404).send("User not found");
 
-    res.json({ url: safeProfileIcon(user.profileIcon) }); // ✅ fallback
+    res.json({ url: safeProfileIcon(user.profileIcon) });
   } catch (err) {
     console.error("Profile fetch error:", err);
     res.status(500).send("Failed to fetch photo");
   }
 });
 
+// -------------------- Delete Profile Photo --------------------
 app.delete("/api/profile-photo", requireLogin, async (req, res) => {
   try {
     await User.updateOne(
       { userId: req.session.userId },
-      { $set: { profileIcon: "" } } // ✅ fallback will cover this
+      { $set: { profileIcon: "" } }
     );
     res.json({ message: "✅ Profile photo deleted" });
   } catch (err) {
@@ -538,7 +537,7 @@ app.delete("/api/profile-photo", requireLogin, async (req, res) => {
   }
 });
 
-// -------------------- Public User Profile API --------------------
+// -------------------- Public User Profile --------------------
 app.get("/api/users/:userId", async (req, res) => {
   try {
     const user = await User.findOne(
@@ -554,8 +553,8 @@ app.get("/api/users/:userId", async (req, res) => {
 
     res.json({
       ...user.toObject(),
-      profileIcon: safeProfileIcon(user.profileIcon), // ✅ unified fallback
-      address: verification ? verification.address : null,
+      profileIcon: safeProfileIcon(user.profileIcon),
+      address: verification?.address || null,
     });
   } catch (err) {
     console.error("Public profile fetch error:", err);

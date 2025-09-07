@@ -1,7 +1,9 @@
+// viewusers.js
+
 // -------------------- Helper: Safe Profile Icon --------------------
 function safeProfileIcon(icon) {
   if (icon && icon.trim() !== "") return icon;
-  return `${window.location.origin}/default-avatar.png`; 
+  return `${window.location.origin}/default-avatar.png`;
 }
 
 // -------------------- Render Status Badge --------------------
@@ -58,13 +60,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("user-email").textContent = user.email;
     renderStatusBadge(user);
 
-    // Address (from Verification)
+    // Address
     document.getElementById("homeAddress").textContent =
       user.address && user.address.trim() !== ""
         ? user.address
         : "No address available";
 
-    // ✅ Profile photo (use safe helper)
+    // ✅ Profile photo (Cloudinary URL or fallback)
     const photoEl = document.getElementById("profilePhoto");
     photoEl.src = safeProfileIcon(user.profileIcon);
   } catch (err) {
@@ -75,23 +77,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Setup menu after page loads
   setupMenu();
 });
-
-// -------------------- Menu Open/Close --------------------
-function setupMenu() {
-  const openMenuBtn = document.getElementById("openmenu");
-  const closeMenuBtn = document.getElementById("closemenu");
-  const moreMenu = document.getElementById("more");
-
-  if (!openMenuBtn || !closeMenuBtn || !moreMenu) return;
-
-  openMenuBtn.addEventListener("click", () => {
-    moreMenu.style.display = "block";
-  });
-
-  closeMenuBtn.addEventListener("click", () => {
-    moreMenu.style.display = "none";
-  });
-}
 
 // -------------------- Request & Report --------------------
 function requestBtn() {

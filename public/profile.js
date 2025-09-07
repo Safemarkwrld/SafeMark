@@ -1,9 +1,9 @@
-// profile.js
+1// profile.js
 
 // -------------------- Render Status Badge --------------------
 function renderStatusBadge(user) {
   const badge = document.getElementById("user-status");
-  const addressStatus = document.querySelector('.addressStatus');
+  const addressStatus = document.querySelector(".addressStatus");
 
   if (user.verified) {
     badge.innerHTML = `
@@ -12,7 +12,7 @@ function renderStatusBadge(user) {
         <p id="verified-status">Verified</p>
       </div>
     `;
-    addressStatus.innerText = 'Address verified by Google and Safemark.';
+    addressStatus.innerText = "Address verified by Google and Safemark.";
   } else if (user.pending) {
     badge.innerHTML = `
       <div class="statusId">
@@ -20,7 +20,7 @@ function renderStatusBadge(user) {
         <p id="pending-status">Pending</p>
       </div>
     `;
-    addressStatus.innerText = 'Address under review, on Google Maps';
+    addressStatus.innerText = "Address under review, on Google Maps";
   } else {
     badge.innerHTML = `
       <div class="holder">
@@ -51,13 +51,9 @@ async function loadProfile() {
     // Render status badge
     renderStatusBadge(user);
 
-    // ✅ Profile photo (direct URL or fallback)
+    // ✅ Profile photo (Cloudinary or backend fallback)
     const profilePhoto = document.getElementById("profilePhoto");
-    if (user.profileIcon) {
-      profilePhoto.src = user.profileIcon; // Cloudinary URL with safe fallback
-    } else {
-      profilePhoto.src = "/default-avatar.png"; // must be absolute path
-    }
+    profilePhoto.src = user.profileIcon; // backend guarantees safe URL
   } catch (err) {
     console.error("Profile load error:", err);
   }
@@ -102,22 +98,24 @@ async function deleteProfilePhoto() {
   }
 }
 
-const myMenu = document.querySelector('.bottom-menu')
-function openMenu(){
-  myMenu.classList.add('menu-active');
+// -------------------- Bottom Menu --------------------
+const myMenu = document.querySelector(".bottom-menu");
+function openMenu() {
+  myMenu.classList.add("menu-active");
 }
 function closeMenu() {
-  myMenu.classList.remove('menu-active');
+  myMenu.classList.remove("menu-active");
 }
 
 // -------------------- Init --------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadProfile();
-  
+
   const uploadBtnCard = document.getElementById("uploadMainBtn");
   const uploadBtnMenu = document.getElementById("uploadMenuBtn");
-  const photoInput    = document.getElementById("photoInput");
-  const deleteBtn     = document.getElementById("deleteBtn");
+  const photoInput = document.getElementById("photoInput");
+  const deleteBtn = document.getElementById("deleteBtn");
+
   // open file chooser from either button
   [uploadBtnCard, uploadBtnMenu].forEach(btn => {
     if (btn) btn.addEventListener("click", () => photoInput.click());
