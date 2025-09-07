@@ -380,6 +380,11 @@ summary {
   flex-direction: column;
   margin-top: 5px;
 }
+#why-bnb{
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+}
 .paymentproof{
   display: flex;
   flex-direction: row;

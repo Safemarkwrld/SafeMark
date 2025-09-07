@@ -488,7 +488,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
   paymentCardsDiv.innerHTML = `
     <h3 id="methods">Payment methods:</h3>
     <div class="card-with-discount">
-      <h3>Binance Pay(recommendend)<img src="3246711.png" alt="binance icon"></h3>
+      <h3>Binance Pay(recommendend)<a href="information.html#binancePay" id="why-bnb">Why it?</a><img src="3246711.png" alt="binance icon"></h3>
       <h5>Pay securely with Binance on SafeMark and enjoy an exclusive 15% discount.</h5>
       <div class="benefits-BNB">
         <details>
@@ -506,7 +506,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
       <div class="safemark-details">
         <h4 id="pay-heading">Payment details:</h4>
         <div class="bnb-details">
-          <h4>Binance ID: 107 918 798 5</h4>
+          <h4>Binance ID: 1079187985</h4>
           <button>Scan QR Code</button>
         </div>
       </div>
