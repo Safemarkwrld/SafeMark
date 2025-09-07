@@ -549,7 +549,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
         </div>
         <div class="amount">
           <p>Amount:</p>
-          <h3 id="card-amount">R5,000</h3>
+          <h3 id="card-amount">R...</h3>
         </div>
         <button onclick="cardpayBtn()">pay now</button>
       </div>
@@ -646,4 +646,3 @@ function initSteps() {
     calculateGrandTotal();
   });
 }
-cardpayBtn("alert(`Sorry try other payment methods, this method is currently unavailable`)")
