@@ -73,9 +73,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error loading user:", err);
     alert("Failed to load profile");
   }
-
-  // Setup menu after page loads
-  setupMenu();
 });
 
 // -------------------- Request & Report --------------------
