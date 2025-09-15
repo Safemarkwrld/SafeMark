@@ -636,7 +636,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
         <a href="mailto:safemark.world@gmail.com?subject=Inquiry&body=Hello%20SafeMark,">Confirm account no.</a>
       </div>
       <p>Upload proof of payment:</p>
-      <div class="bank-proof-input">
+      <div class="paymentproof">
         <input type="file"><button type="submit" id="proof-of-payment">Upload</button>
       </div>
       
@@ -700,8 +700,8 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
       </div>
       <div class="uploadPayment">
         <h3>Upload proof of payment:</h3>
-        <div class="paymentproof">
-          <input type="file"><button type="submit" id="binance-proof-of-payment" required><img src="745052.png" alt="upload" id="upload-proof"></button>
+        <div class="payment-proof-binance">
+          <input type="file"><button type="submit" id="binance-proof-of-payment" required<button>Upload</button>
         </div>
       </div>
     </div>

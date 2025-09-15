@@ -478,24 +478,11 @@ summary {
   display: flex;
   flex-direction: row;
   align-items: center;
-  border: 1px solid #f0b90b;
-  border-radius: 999px;
   padding-left: 10px;
   max-width: 75%;
   justify-content: space-between;
 }
-#proof-of-payment{
-  background-color: #f0b90b;
-  padding: 3px;
-  border: 0;
-  align-items: center;
-  justify-content: center;
-  height: auto;
-  width: 30px;
-  display: flex;
-  flex-direction: column;
-  border-radius: 999px;
-}
+
 #upload-proof{
   height: 18px;
   width: 18px;
@@ -558,16 +545,17 @@ summary {
   align-items: center;
 
 }
-.bank-proof-input button{
+#proof-of-payment{
   border: none;
   background-color: #0078d4;
   color: #eee;
   font-size: 1.1em;
+  font-weight: 600;
   padding: 6px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  display: flex;
   border-radius: 4px;
   cursor: pointer;
 }
