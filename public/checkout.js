@@ -637,7 +637,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
       </div>
       <p>Upload proof of payment:</p>
       <div class="bank-proof-input">
-        <input type="file" name="bank-payment-proof" required>
+        <input type="file" name="proof" required>
         <button id="bank-pay-button">Upload</button>
       </div>
       

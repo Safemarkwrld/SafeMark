@@ -1065,6 +1065,13 @@ app.get("/api/checkout/get", requireLogin, async (req, res) => {
 });
 
 app.use("/api/checkout", checkoutRouter);
+app.get("/marketplace.html", requireLogin, async (req, res) => {
+  const activeOrder = await Order.findOne({ buyerId: req.session.userId, orderStatus: false });
+  if (activeOrder) {
+    return res.send("You have a pending order. Cannot access marketplace until it is reviewed.");
+  }
+  res.sendFile(path.join(__dirname, "public", "marketplace.html"));
+});
 
 // -------------------- Server Start --------------------
 async function startServer(app) {
