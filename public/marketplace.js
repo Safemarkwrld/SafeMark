@@ -257,7 +257,7 @@ async function loadCartItems() {
   const totalDisplay = document.getElementById("cart-total");
 
   container.innerHTML = "<p>Loading your cart...</p>";
-
+  
   const cart = await getCart();
   container.innerHTML = "";
 
@@ -296,7 +296,6 @@ async function loadCartItems() {
         
       `;
     }
-
     card.innerHTML = `
       <div class="itemCard-container">
         ${imgHTML}
@@ -331,7 +330,7 @@ async function loadCartItems() {
     `;
 
     container.appendChild(card);
-
+    card.dataset.productCode = item.productCode;
     // ✅ Radio event to update price immediately
     card.querySelectorAll(`input[name="purchaseOption-${item.productCode}"]`).forEach(radio => {
       radio.addEventListener("change", () => {
@@ -370,7 +369,6 @@ async function loadCartItems() {
     totalDisplay.textContent = `Total: R${sum.toFixed(2)}`;
   }
 }
-
 // === Proceed to Checkout ===
 const proceedBtn = document.getElementById("proceed-to-checkout-btn");
 if (proceedBtn) {
@@ -386,41 +384,50 @@ if (proceedBtn) {
         return;
       }
 
-      // 2. Group items by seller
-      // 2. Group items by seller
-const grouped = {};
-document.querySelectorAll(".cartItem-card").forEach(card => {
-  const sellerId = card.querySelector(".seller-link")?.getAttribute("href")?.replace("viewusers.html#", "");
-  if (!sellerId) return;
+      // 2. Group items by seller and capture purchase option per item
+      const grouped = {};
 
-  const productCode = card.querySelector(".item-details p b")?.innerText || "";
-  const name = card.querySelector(".item-details h3")?.innerText || "";
-  const qty = 1; // adjust if you later support multiple quantities
-  const updatedPrice = Number(card.querySelector(".price-tag").textContent.replace("R", "")) || 0;
+      document.querySelectorAll(".cartItem-card").forEach(card => {
+        const sellerId = card.querySelector(".seller-link")
+          ?.getAttribute("href")
+          ?.replace("viewusers.html#", "");
+        if (!sellerId) return;
 
-  if (!grouped[sellerId]) {
-    grouped[sellerId] = {
-      sellerId,
-      items: []
-    };
-  }
+        const productCode = card.dataset.productCode;
+        const name = card.querySelector(".item-details h3")?.innerText || "";
+        const qty = 1; // later support multiple
+        const updatedPrice =
+          Number(card.querySelector(".price-tag").textContent.replace("R", "")) || 0;
 
-  grouped[sellerId].items.push({
-    productCode,
-    name,
-    updatedPrice,  // ✅ now sends the adjusted price
-    quantity: qty
-  });
-});
+        const selectedOption =
+          card.querySelector(`input[name="purchaseOption-${productCode}"]:checked`)
+            ?.value || "purchase";
 
-const sellers = Object.values(grouped);
+        if (!grouped[sellerId]) {
+          grouped[sellerId] = { sellerId, items: [] };
+        }
+
+        grouped[sellerId].items.push({
+          productCode,
+          name,
+          updatedPrice,
+          quantity: qty,
+          selectedOption,
+        });
+      });
+
+      const sellers = Object.values(grouped);
+
+      // 👇 Debug log
       console.log("Proceed checkout payload:", { sellers });
+      console.log("🚀 Sending checkout payload:");
+      console.log(JSON.stringify({ sellers }, null, 2));
 
       // 3. Send payload to create checkout in DB
       const res = await fetch("/api/checkout/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sellers })
+        body: JSON.stringify({ sellers }),
       });
 
       if (!res.ok) {
@@ -435,6 +442,7 @@ const sellers = Object.values(grouped);
       window.location.href = "/checkout.html";
     } catch (err) {
       console.error("Error creating checkout:", err);
+      alert("Failed to proceed to checkout. Please try again.");
     }
   });
 }
@@ -442,5 +450,4 @@ const sellers = Object.values(grouped);
 // -------------------- Initialize --------------------
 document.addEventListener("DOMContentLoaded", () => {
   showSection("selling"); // default tab
-  loadCartItems();
 });

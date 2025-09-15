@@ -229,6 +229,9 @@ body{
   align-items: center;
   align-self: center;
 }
+#address-pointer{
+  font-weight: 600;
+}
 .below-bar {
   display: flex;
   flex-direction: row;

@@ -118,8 +118,10 @@ function calculateGrandTotal() {
     el.textContent = `Total: R${window.grandTotal.toFixed(2)}`;
   });
 
-  const cardAmountEl = document.getElementById("card-amount");
-  if (cardAmountEl) cardAmountEl.textContent = `R${window.grandTotal.toFixed(2)}`;
+      const cardAmountEl = document.getElementById("card-amount");
+      const bankAmount = document.getElementById("bank-amount");
+      if (cardAmountEl) cardAmountEl.textContent = `R${window.grandTotal.toFixed(2)}`;
+      if (bankAmount) bankAmount.textContent = `R${window.grandTotal.toFixed(2)}`;
 
   // Apply 15% Binance discount
   const discount = window.grandTotal * 0.15;
@@ -199,7 +201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                       <h4>${escapeHtml(it.name)}</h4>
                       <p><b>Quantity:</b> ${it.quantity}</p>
                       <p><b>Price:</b> R${price.toFixed(2)}</p>
-                      <h4 id="item-total"><b>Total:</b> R${total}</h4>
+                      <h4 id="item-total">Total: R${total}</h4>
                     </div>
                   </div>
                 </div>
@@ -352,52 +354,137 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
     );
 
-    // -------------------- RENDER PAYMENT ITEMS --------------------
-    const allItems = checkout.checkout.sellers.flatMap((seller) =>
-      seller.items.map((item) => ({ ...item, sellerId: seller.sellerId }))
-    );
 
-    paymentItemsDiv.innerHTML = allItems
-      .map((item) => {
-        const imageSrc = item.image || "placeholder.png";
-        const total = (Number(item.updatedPrice) * Number(item.quantity || 1)).toFixed(2);
-        return `
-        <div class="payment-card">
-          <div class="column-cont">
-            <div class="item-row">
-              <div></div>
-              <div class="item-info">
-                <h4>${escapeHtml(item.name)}</h4>
-                <p><b>Quantity:</b> ${item.quantity}</p>
-                <p><b>Price:</b> R${Number(item.updatedPrice).toFixed(2)}</p>
-                <h4 id="item-total"><b>Total:</b> R${total}</h4>
-              </div>
-            </div>
-            <div class="description">
-              <p>
-                After completing your purchase, SafeMark will immediately issue you an official <b>Ownership Transfer Certificate.</b>
-                <br> <a href="information.html#ootc" id="ootcLink">Learn More...</a>
-              </p>
+   // -------------------- RENDER PAYMENT ITEMS --------------------
+const allItems = checkout.checkout.sellers.flatMap((seller) =>
+  seller.items.map((item) => ({ ...item, sellerId: seller.sellerId }))
+);
+
+paymentItemsDiv.innerHTML = allItems
+  .map((item) => {
+    const total = (Number(item.updatedPrice) * Number(item.quantity || 1)).toFixed(2);
+    return `
+      <div class="payment-card" data-item-id="${item.id}">
+        <div class="column-cont">
+          <div class="item-row">
+            <div></div>
+            <div class="item-info">
+              <h4>${escapeHtml(item.name)}</h4>
+              <p><b>Quantity:</b> ${item.quantity}</p>
+              <p><b>Price:</b> R${Number(item.updatedPrice).toFixed(2)}</p>
+              <h4 id="item-total" data-original="Total: R${total}"><b>Total:</b> R${total}</h4>
             </div>
           </div>
-        </div>`;
-      })
-      .join("");
+          <div class="description">
+            <p>
+              After completing your purchase, SafeMark will immediately issue you an official <b>Ownership Transfer Certificate.</b>
+              <br> <a href="information.html#ootc" id="ootcLink">Learn More...</a>
+            </p>
+          </div>
+        </div>
+      </div>`;
+  })
+  .join("");
 
-    injectSelectedDeliveries(checkout);
-    calculateGrandTotal();
+// -------------------- PAYMENT TYPE LOGIC --------------------
+const paymentType = document.querySelector('.payment-type-checkout');
+
+if (allItems.every(item => item.selectedOption === "test")) {
+  paymentType.innerHTML = `
+    <div class="pay-to-safemark">
+      <h3>Pay to SafeMark</h3>
+      <input type="radio" name="payment-method" value="safemark" checked>
+    
+      <p>Secure your purchase with SafeMark. 
+        Instant proof of payment and full protection for your order, 
+        including fast issuance of your Ownership Transfer Certificate.
+      </p>
+      </div>
+  `;
+} else {
+  paymentType.innerHTML = `
+    <div class="pay-to-safemark">
+      <h3>Pay to SafeMark</h3>
+      <input type="radio" name="payment-method" value="safemark" checked>
+      <p>Secure your purchase with SafeMark. 
+        Instant proof of payment and full protection for your order, 
+        including fast issuance of your Ownership Transfer Certificate.
+      </p>
+    </div>
+    <div class="cash-on-delivery">
+      <h3>Cash on delivery</h3>
+      <input type="radio" name="payment-method" value="cod">
+      <p>
+        Pay only when your order arrives at your door. 
+        Simple, safe, and convenient, with delivery fees included.
+      </p>
+    </div>
+  `;
+}
+
+// -------------------- PAYMENT METHOD TOGGLE --------------------
+document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const method = e.target.value; // 'safemark' or 'cod'
+
+    document.querySelectorAll('#pay-items .payment-card #item-total').forEach((el) => {
+      if (method === "cod") {
+        el.textContent = `Total: R0.00`; // clear item totals
+      } else {
+        el.textContent = el.dataset.original; // restore original totals
+      }
+    });
+
+    // Recalculate grand total
+    if (method === "cod") {
+      const deliveryTotal = Array.from(document.querySelectorAll("#pay-deliveries .payment-delivery .costprice h4"))
+        .reduce((sum, el) => sum + (parseFloat(el.textContent.replace(/[^0-9.]/g, "")) || 0), 0);
+
+      window.grandTotal = deliveryTotal;
+
+      document.querySelectorAll("#grand-total").forEach((el) => {
+        el.textContent = `Total: R${window.grandTotal.toFixed(2)}`;
+      });
+
+      const cardAmountEl = document.getElementById("card-amount");
+      const bankAmount = document.getElementById("bank-amount");
+      if (cardAmountEl) cardAmountEl.textContent = `R${window.grandTotal.toFixed(2)}`;
+      if (bankAmount) bankAmount.textContent = `R${window.grandTotal.toFixed(2)}`;
+
+      const costEl = document.getElementById("cost-amount");
+      const discountEl = document.getElementById("discount-amount");
+      const finalEl = document.getElementById("final-amount");
+      if (costEl && discountEl && finalEl) {
+        costEl.textContent = `Original: R${window.grandTotal.toFixed(2)}`;
+        discountEl.textContent = `Discount (15%): -R0.00`;
+        finalEl.textContent = `Final: R${window.grandTotal.toFixed(2)}`;
+      }
+    } else {
+      // Safemark → recalc normally
+      calculateGrandTotal();
+    }
+  });
+});
+
+// -------------------- INJECT SELECTED DELIVERIES --------------------
+injectSelectedDeliveries(checkout);
+calculateGrandTotal();
 
     // -------------------- PAYMENT PROOF --------------------
-    document.getElementById("proof-of-payment")?.addEventListener("click", async (e) => {
+document.getElementById("proof-of-payment")?.addEventListener("click", async (e) => {
   e.preventDefault();
   const fileInput = document.querySelector(".paymentproof input[type='file']");
   const file = fileInput?.files[0];
-  // Prepare form data
+  if (!file) {
+    alert("Please select payment proof before submitting.");
+    return;
+  }
+
   const formData = new FormData();
   formData.append("proof", file);
   formData.append("amount", window.grandTotal);
   formData.append("method", "Binance Pay");
-  formData.append("checkoutSnapshot", JSON.stringify(window.globalCheckout)); // <-- new
+  formData.append("checkoutSnapshot", JSON.stringify(window.globalCheckout));
   formData.append("deliverySelections", JSON.stringify(
     window.globalCheckout.checkout.sellers.map(s => {
       const selectedRadio = document.querySelector(`input[name="delivery-${s.sellerId}"]:checked`);
@@ -406,18 +493,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         selectedDelivery: selectedRadio?.value || null
       };
     })
-  )); // <-- new
+  ));
 
   try {
     const res = await fetch("/api/payments/upload-proof", { method: "POST", body: formData });
     const data = await res.json();
-
-    if (!res.ok);
+    if (!res.ok) throw new Error(data.message || "Failed to upload payment proof!");
 
     window.paymentUnderReview = true;
     fileInput.value = "";
 
-    // Update UI
     const paymentCardsDiv = document.querySelector(".payment-cards");
     if (paymentCardsDiv) {
       paymentCardsDiv.innerHTML = `
@@ -430,11 +515,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("confirmation-section").classList.add("active");
 
   } catch (err) {
-    console.error(err);
-
+    console.error("Upload failed:", err);
+    alert("Something went wrong. Please try again.");
   }
 });
 
+// -------------------- BANK (Capitec) PROOF --------------------
+document.getElementById("bank-pay-button")?.addEventListener("click", async (e) => {
+  e.preventDefault();
+  const fileInput = document.querySelector(".bank-proof-input input[type='file']");
+  const file = fileInput?.files[0];
+  if (!file) {
+    alert("Please select bank payment proof before submitting.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("proof", file);
+  formData.append("amount", window.grandTotal);
+  formData.append("method", "Capitec Pay");
+  formData.append("checkoutSnapshot", JSON.stringify(window.globalCheckout));
+  formData.append("deliverySelections", JSON.stringify(
+    window.globalCheckout.checkout.sellers.map(s => {
+      const selectedRadio = document.querySelector(`input[name="delivery-${s.sellerId}"]:checked`);
+      return {
+        sellerId: s.sellerId,
+        selectedDelivery: selectedRadio?.value || null
+      };
+    })
+  ));
+
+  try {
+    const res = await fetch("/api/payments/upload-proof", { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to upload bank proof!");
+
+    window.paymentUnderReview = true;
+    fileInput.value = "";
+
+    const paymentCardsDiv = document.querySelector(".payment-cards");
+    if (paymentCardsDiv) {
+      paymentCardsDiv.innerHTML = `
+        <h3>Bank Payment under review...</h3>
+        <p>Your proof of payment has been submitted. SafeMark admin will verify and confirm it shortly.</p>
+      `;
+    }
+
+    document.querySelectorAll(".step1, .step2, .step3").forEach(step => step.classList.remove("active"));
+    document.getElementById("confirmation-section").classList.add("active");
+
+  } catch (err) {
+    console.error("Bank upload failed:", err);
+    alert("Something went wrong with bank proof upload.");
+  }
+});
     // -------------------- RADIO CHANGE LISTENER --------------------
     document.addEventListener("change", (e) => {
       if (e.target.matches("[name^='delivery-']")) {
@@ -487,8 +621,63 @@ const paymentCardsDiv = document.querySelector(".payment-cards");
 if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
   paymentCardsDiv.innerHTML = `
     <h3 id="methods">Payment methods:</h3>
+
+      <div class="nearest-deliver">
+      <h3>Pay to nearest staff.</h3>
+      <img src="capitecimg.png" alt="capitec" id="capitec-image">
+      <label>Pay instantly with <p id="capitec-pay">Capitec Pay</p></label>
+      <div class="account-details">
+        <div class="each-detail">
+          <p>Amount:</p> <p id="bank-amount"></p>
+        </div>
+        <div class="each-detail">
+          <p>ACCOUNT NO. : </p> <p>2247912288</p>
+        </div>
+        <a href="mailto:safemark.world@gmail.com?subject=Inquiry&body=Hello%20SafeMark,">Confirm account no.</a>
+      </div>
+      <p>Upload proof of payment:</p>
+      <div class="bank-proof-input">
+        <input type="file" name="bank-payment-proof" required>
+        <button id="bank-pay-button">Upload</button>
+      </div>
+      
+      </div>
+
+    <div class="cardPayment">
+      <div class="icon-logos">
+        <img src="1592515.png" alt="logos">
+        <img src="158822.png" alt="logos">
+        <img src="1592497.png" alt="logos">
+        <img src="1592484.png" alt="logos">
+        <img src="1592479.png" alt="logos">
+        <img src="1592515.png" alt="logos">
+      </div>
+      <div class="banking-details">
+        <div class="card-number">
+          <p>Card Number:</p>
+          <input type="text" name="card-number" placeholder="0000 0000 0000 0000">
+        </div>
+        <div class="exp-csc">
+          <div class="expiration">
+            <p>expiration Date:</p>
+            <input type="text"  name="cc-exp" placeholder="mm / yyyy">
+          </div>
+          <div class="csc">
+            <div class="card-security">
+              <p>Card Security Code:</p>
+              <input type="text" name=cvv"" placeholder="0000">
+            </div>
+          </div>     
+        </div>
+        <div class="amount">
+          <p>Amount:</p>
+          <h3 id="card-amount">R...</h3>
+        </div>
+        <button onclick="cardpayBtn()">pay now</button>
+      </div>
+    </div>
     <div class="card-with-discount">
-      <h3>Binance Pay(recommendend)<a href="information.html#binancePay" id="why-bnb">Why it?</a><img src="3246711.png" alt="binance icon"></h3>
+      <h3>Binance Pay<img src="3246711.png" alt="binance icon"></h3>
       <h5>Pay securely with Binance on SafeMark and enjoy an exclusive 15% discount.</h5>
       <div class="benefits-BNB">
         <details>
@@ -515,43 +704,6 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
         <div class="paymentproof">
           <input type="file"><button type="submit" id="proof-of-payment" required><img src="745052.png" alt="upload" id="upload-proof"></button>
         </div>
-      </div>
-    </div>
-
-    <div class="cardPayment">
-      <div class="icon-logos">
-        <img src="1592515.png" alt="logos">
-        <img src="158822.png" alt="logos">
-        <img src="1592497.png" alt="logos">
-        <img src="1592484.png" alt="logos">
-        <img src="1592479.png" alt="logos">
-        <img src="1592515.png" alt="logos">
-      </div>
-      <div class="banking-details">
-        <div class="card-number">
-          <p>Card Number:</p>
-          <input type="text" name="card-number" placeholder="0000 0000 0000 0000">
-        </div>
-        <div class="exp-csc">
-          <div class="expiration">
-            <p>expiration Date:</p>
-            <input type="text"  name="cc-exp" placeholder="mm / yyyy">
-          </div>
-          <div class="csc">
-            <div class="card-security">
-              <p>Card Security Code:</p>
-              <input type="text" name=cvv"" placeholder="0000">
-            </div>
-            <div class="card-icon">
-              <img src="3503359.png" alt="card icon" id="card-icon">
-            </div>
-          </div>     
-        </div>
-        <div class="amount">
-          <p>Amount:</p>
-          <h3 id="card-amount">R...</h3>
-        </div>
-        <button onclick="cardpayBtn()">pay now</button>
       </div>
     </div>
   `;

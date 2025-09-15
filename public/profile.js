@@ -1,5 +1,21 @@
 1// profile.js
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch("/api/orders/active");
+    const data = await res.json();
 
+    if (data.active) {
+      const marketplaceLink = document.querySelector('a[href="marketplace.html"]');
+      if (marketplaceLink) {
+        marketplaceLink.style.pointerEvents = "none"; // block clicks
+        marketplaceLink.style.opacity = "0.5";       // gray it out
+        marketplaceLink.title = "You already have a pending order. Complete it before starting a new one.";
+      }
+    }
+  } catch (err) {
+    console.error("Error checking active order:", err);
+  }
+});
 // -------------------- Render Status Badge --------------------
 function renderStatusBadge(user) {
   const badge = document.getElementById("user-status");

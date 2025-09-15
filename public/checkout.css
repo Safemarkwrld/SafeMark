@@ -31,7 +31,10 @@ body {
   border-bottom: grey 2px solid;
   border-bottom-left-radius: 10px;
   color: #0078d4;
-
+  position: sticky;
+  top: -10px;
+  background-color: white;
+  z-index: 999;
 }
 .topBar a{
   height: 35px;
@@ -189,7 +192,7 @@ body {
   margin-bottom: 5px;
   max-width: 75%;
 }
-.bottom-bar{
+.delivery-bottom-bar{
   background-color: white;
   z-index: 999999;
   position: fixed;
@@ -201,6 +204,22 @@ body {
   justify-content: center;
   box-shadow: rgb(110, 110, 110, 0.2) 0 -3px 5px;
   align-items: center;
+  height: 60px;
+}
+.bottom-bar{
+  background-color: white;
+  z-index: 999999;
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  width: 100%;
+  justify-content: center;
+  box-shadow: rgb(110, 110, 110, 0.2) 0 -3px 5px;
+  align-items: center;
+  height: 60px;
+  margin-top: 10%;
 }
 .proceed-to-payment-btn{
   background-color: #0078d4;
@@ -268,10 +287,7 @@ body {
   border-radius: 12px;
   max-height: 200px;
 }
-.payment-card img{
-  height: 100%;
-  width: 100px;
-}
+
 .column-cont{
   display: flex;
   flex-direction: column;
@@ -296,7 +312,80 @@ body {
   padding: 0 10px;
   color: #0078d4;
 }
+.pay-to-safemark{
+  display: flex;
+  flex-direction: column;
+  border: 2px #ccc solid;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #ddd;
+  border-radius: 12px;
+  max-height: 200px;
+  position: relative;
+  transition: backgroud 0.75s ease, color 1s ease-in;
+}
+.pay-to-safemark p{
+  width: 75%;
+}
+.pay-to-safemark input{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.cash-on-delivery{
+  display: flex;
+  flex-direction: column;
+  border: 2px #ccc solid;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #ddd;
+  border-radius: 12px;
+  max-height: 200px;
+  position: relative;
+  transition: backgroud 0.75s ease, color 1s ease-in;
+}
+.cash-on-delivery p{
+  width: 75%;
+}
+.cash-on-delivery input{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
 
+/*TYPE OF PAYMENT WHEN CHECKED*/
+.pay-to-safemark:has(input:checked){
+  display: flex;
+  flex-direction: column;
+  border: 2px #0078d4 solid;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #0078d4;
+  color: white;
+  border-radius: 12px;
+  max-height: 200px;
+  position: relative;
+  transition: backgroud 0.75s ease, color 1s ease-in;
+}
+.cash-on-delivery:has(input:checked){
+  display: flex;
+  flex-direction: column;
+  border: 2px #0078d4 solid;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #0078d4;
+  color: white;
+  border-radius: 12px;
+  max-height: 200px;
+  position: relative;
+  transition: backgroud 0.75s ease, color 1s ease-in;
+}
 /*PAYMENT CARDS STYLING */
 #methods{
   margin-top: 20px;
@@ -410,6 +499,77 @@ summary {
 #upload-proof{
   height: 18px;
   width: 18px;
+}
+.nearest-deliver{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #002e5b;
+  border-radius: 12px;
+  padding: 10px;
+  border: 2px solid #2f70ef;
+  color: #eee;
+  font-size: 1.1em;
+  font-weight: 550;
+}
+.nearest-deliver label{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 0.9em;
+  color: #eee;
+  margin: 5px 0;
+  gap: 3px;
+}
+#capitec-pay{
+  color: #0078d4;
+  font-weight: 600;
+}
+#capitec-image{
+  height: 40px;
+  width: 80px;
+  border-radius: 20px;
+}
+
+.account-details{
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: end;
+  width: 100%;
+}
+.account-details a{
+  text-decoration: none;
+  color: #0078d4;
+  font-size: 1em;
+  margin-top: 5px;
+}
+.each-detail {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+}
+.bank-proof-input{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+}
+.bank-proof-input button{
+  border: none;
+  background-color: #0078d4;
+  color: #eee;
+  font-size: 1.1em;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
 }
 .cardPayment{
   border: #ddd 2px solid;

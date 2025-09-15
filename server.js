@@ -130,12 +130,14 @@ const checkoutSchema = new mongoose.Schema({
           name: String,
           updatedPrice: Number, // pulled from front-end
           quantity: Number,
+          selectedOption: { type: String, enum: ["purchase", "test"], default: "purchase" }, // ✅ fixed
         },
       ],
     },
   ],
   createdAt: { type: Date, default: Date.now },
 });
+
 const Checkout = mongoose.model("Checkout", checkoutSchema);
 
 // -------------------- Payments Schema --------------------
@@ -870,14 +872,21 @@ checkoutRouter.get("/get", requireLogin, async (req, res) => {
 
         const items = await Promise.all(
           (s.items || []).map(async (it) => {
-            const prod = await Item.findOne({ productCode: it.productCode }, "images price name").lean();
+            const prod = await Item.findOne(
+              { productCode: it.productCode },
+              "images price name"
+            ).lean();
+
             return {
               productCode: it.productCode,
               name: it.name ?? prod?.name ?? "",
               quantity: it.quantity,
               updatedPrice:
-                typeof it.updatedPrice === "number" ? it.updatedPrice : (typeof prod?.price === "number" ? prod.price : 0),
+                typeof it.updatedPrice === "number"
+                  ? it.updatedPrice
+                  : (typeof prod?.price === "number" ? prod.price : 0),
               image: prod?.images?.[0] || null,
+              selectedOption: it.selectedOption || "purchase" // ✅ keep option
             };
           })
         );
@@ -939,59 +948,80 @@ const uploadProofToCloudinary = (fileBuffer) =>
     streamifier.createReadStream(fileBuffer).pipe(stream);
   });
 
-app.post("/api/payments/upload-proof", requireLogin, uploadMemory.single("proof"), async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { amount, method } = req.body;
+app.post(
+  "/api/payments/upload-proof",
+  requireLogin,
+  uploadMemory.single("proof"),
+  async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const { amount, method } = req.body;
 
-    const checkout = await Checkout.findOne({ userId });
-    if (!checkout) return res.status(400).json({ error: "No active checkout found" });
+      const checkout = await Checkout.findOne({ userId });
+      if (!checkout) {
+        return res.status(400).json({ error: "No active checkout found" });
+      }
 
-    let proofUrl = null;
-    if (req.file) {
-      proofUrl = await uploadToCloudinary(req.file.buffer, "payment_proofs");
-    }
+      let proofUrl = null;
+      if (req.file) {
+        // ✅ use the right function
+        proofUrl = await uploadProofToCloudinary(req.file.buffer);
+      }
 
-    const payment = new Payment({
-      userId,
-      method,
-      originalTotal: Number(amount),
-      discount: Number(amount) * 0.15,
-      finalAmount: Number(amount) * 0.85,
-      proofPath: proofUrl,
-      checkoutSnapshot: checkout.toObject(),
-      status: "pending",
-    });
-    await payment.save();
+      // ✅ Apply discount only for Binance Pay
+      let discount = 0;
+      let finalAmount = Number(amount);
+      if (method === "Binance Pay") {
+        discount = Number(amount) * 0.15;
+        finalAmount = Number(amount) - discount;
+      }
 
-    const order = new Order({
-      buyerId: userId,
-      paymentId: payment._id,
-      checkoutSnapshot: checkout.toObject(),
-      sellers: checkout.sellers.map((s) => ({
-        sellerId: s.sellerId,
-        sellerDroppedPin: s.sellerDroppedPin,
-        items: s.items.map((it) => ({
-          productCode: it.productCode,
-          name: it.name,
-          quantity: it.quantity,
-          price: it.updatedPrice || it.price,
-          image: it.image || "",
+      const payment = new Payment({
+        userId,
+        method,
+        originalTotal: Number(amount),
+        discount,
+        finalAmount,
+        proofPath: proofUrl,
+        checkoutSnapshot: checkout.toObject(),
+        status: "pending",
+      });
+      await payment.save();
+
+      const order = new Order({
+        buyerId: userId,
+        paymentId: payment._id,
+        checkoutSnapshot: checkout.toObject(),
+        sellers: checkout.sellers.map((s) => ({
+          sellerId: s.sellerId,
+          sellerDroppedPin: s.sellerDroppedPin,
+          items: s.items.map((it) => ({
+            productCode: it.productCode,
+            name: it.name,
+            quantity: it.quantity,
+            price: it.updatedPrice || it.price,
+            image: it.image || "",
+          })),
         })),
-      })),
-      totalAmount: Number(amount),
-      orderStatus: false,
-    });
-    await order.save();
+        totalAmount: payment.finalAmount, // ✅ directly from payment
+        orderStatus: false,
+      });
+      await order.save();
 
-    await Checkout.deleteOne({ userId });
+      await Checkout.deleteOne({ userId });
 
-    return res.json({ success: true, message: "Payment proof uploaded. Order pending approval." });
-  } catch (err) {
-    console.error("Payment proof error:", err);
-    return res.status(500).json({ error: "Server error uploading payment proof" });
+      return res.json({
+        success: true,
+        message: "Payment proof uploaded. Order pending approval.",
+      });
+    } catch (err) {
+      console.error("Payment proof error:", err);
+      return res
+        .status(500)
+        .json({ error: "Server error uploading payment proof" });
+    }
   }
-});
+);
 
 // -------------------- Get My Orders --------------------
 app.get("/api/orders/my", requireLogin, async (req, res) => {
@@ -1005,6 +1035,19 @@ app.get("/api/orders/my", requireLogin, async (req, res) => {
   } catch (err) {
     console.error("Fetch my order error:", err);
     return res.status(500).json({ success: false, error: "Server error fetching order" });
+  }
+});
+// -------------------- Check Active Order --------------------
+app.get("/api/orders/active", requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const activeOrder = await Order.findOne({ buyerId: userId, orderStatus: false });
+
+    if (!activeOrder) return res.json({ active: false });
+    return res.json({ active: true, orderId: activeOrder._id });
+  } catch (err) {
+    console.error("Active order check error:", err);
+    return res.status(500).json({ active: false, error: "Server error" });
   }
 });
 
