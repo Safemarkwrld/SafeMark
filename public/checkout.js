@@ -637,8 +637,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
       </div>
       <p>Upload proof of payment:</p>
       <div class="bank-proof-input">
-        <input type="file" name="proof" required>
-        <button id="bank-pay-button">Upload</button>
+        <input type="file"><button type="submit" id="proof-of-payment">Upload</button>
       </div>
       
       </div>
@@ -702,7 +701,7 @@ if (paymentCardsDiv && paymentCardsDiv.innerHTML.trim() === "") {
       <div class="uploadPayment">
         <h3>Upload proof of payment:</h3>
         <div class="paymentproof">
-          <input type="file"><button type="submit" id="proof-of-payment" required><img src="745052.png" alt="upload" id="upload-proof"></button>
+          <input type="file"><button type="submit" id="binance-proof-of-payment" required><img src="745052.png" alt="upload" id="upload-proof"></button>
         </div>
       </div>
     </div>
